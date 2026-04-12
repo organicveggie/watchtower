@@ -53,7 +53,6 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
       - name: Build
-        uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 #v3
+        uses: goreleaser/goreleaser-action
         with:
-          version: v0.155.0
           args: --snapshot --skip-publish --debug

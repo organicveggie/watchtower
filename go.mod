@@ -17,7 +17,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/net v0.19.0
+	golang.org/x/net v0.53.0
 )
 
 require (
@@ -60,8 +60,8 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
-	golang.org/x/text v0.28.0
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect

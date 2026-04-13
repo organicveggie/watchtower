@@ -56,6 +56,14 @@ A string type that controls warning behaviour for failed registry HEAD requests.
 
 ---
 
+**Constants:**
+
+| Constant | Value | Description |
+|---|---|---|
+| `defaultStopSignal` | `"SIGTERM"` | The signal sent to a container when no custom stop signal label is set. |
+
+---
+
 **Public Functions:**
 
 ---
@@ -84,13 +92,13 @@ Queries the Docker daemon for containers matching the configured status filters 
 
 ##### `GetContainer(containerID types.ContainerID) (types.Container, error)`
 
-Inspects a single container by ID. If the container uses `network_mode: container:<id>`, resolves the referenced container's name so that the network mode reference remains valid after the supplier is recreated. Fetches the container's image info via `ImageInspectWithRaw` and returns a fully populated `Container`. If image info cannot be fetched, returns a `Container` with a nil `imageInfo` rather than an error.
+Inspects a single container by ID. If the container uses `network_mode: container:<id>`, resolves the referenced container's name so that the network mode reference remains valid after the supplier is recreated. If the supplier lookup fails, logs a warning and leaves the original network mode unchanged — no error is returned. Fetches the container's image info via `ImageInspectWithRaw` and returns a fully populated `Container`. If image info cannot be fetched, returns a `Container` with a nil `imageInfo` rather than an error.
 
 ---
 
 ##### `StopContainer(c types.Container, timeout time.Duration) error`
 
-Stops a running container by sending its configured stop signal (defaulting to `SIGTERM`), waits for it to exit, then removes it. Respects the `AutoRemove` host config flag — if set, skips the explicit `ContainerRemove` call. After removal, waits again to confirm the container is gone, returning an error if it persists.
+Stops a container by sending its configured stop signal (defaulting to `SIGTERM`) via `ContainerKill`, but only if the container is currently running. Waits for it to exit, then removes it. Respects the `AutoRemove` host config flag — if set, skips the explicit `ContainerRemove` call. After removal, waits again to confirm the container is gone, returning an error if it persists.
 
 ---
 

@@ -30,13 +30,13 @@ Runs the post-check lifecycle hook for every container currently matched by `par
 
 #### `ExecutePreCheckCommand(client container.Client, container types.Container)`
 
-Executes the pre-check command for a single container. Reads the command from the `com.centurylinklabs.watchtower.lifecycle.pre-check` label via `container.GetLifecyclePreCheckCommand()`. If the label is absent or empty, logs a debug message and returns. Errors from `client.ExecuteCommand` are logged but do not propagate — a failing pre-check hook does not interrupt the update cycle.
+Executes the pre-check command for a single container. Reads the command from the `com.centurylinklabs.watchtower.lifecycle.pre-check` label via `container.GetLifecyclePreCheckCommand()`. If the label is absent or empty, logs a debug message and returns. The execution timeout is hardcoded to 1 minute. Errors from `client.ExecuteCommand` are logged but do not propagate — a failing pre-check hook does not interrupt the update cycle.
 
 ---
 
 #### `ExecutePostCheckCommand(client container.Client, container types.Container)`
 
-Executes the post-check command for a single container. Reads the command from the `com.centurylinklabs.watchtower.lifecycle.post-check` label via `container.GetLifecyclePostCheckCommand()`. Follows the same silent-skip and error-logging behaviour as `ExecutePreCheckCommand`.
+Executes the post-check command for a single container. Reads the command from the `com.centurylinklabs.watchtower.lifecycle.post-check` label via `container.GetLifecyclePostCheckCommand()`. Follows the same silent-skip, hardcoded 1-minute timeout, and error-logging behaviour as `ExecutePreCheckCommand`.
 
 ---
 

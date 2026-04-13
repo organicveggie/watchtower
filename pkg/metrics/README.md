@@ -1,6 +1,6 @@
 # `pkg/metrics` Package
 
-This package owns all Prometheus metric definitions and their registration for Watchtower. It defines the counters exposed at the `/v1/metrics` endpoint, provides a singleton accessor for the shared metrics instance, and exposes a `RegisterScan` function that records the result of each update session. It is consumed by `pkg/api/metrics` (for HTTP exposition) and by `cmd/root.go` (via `runUpdatesWithNotifications`, which calls `RegisterScan` after every cycle).
+This package owns all Prometheus metric definitions and their registration for Watchtower. It defines the gauges and counters exposed at the `/v1/metrics` endpoint, provides a singleton accessor for the shared metrics instance, and exposes a `RegisterScan` function that records the result of each update session. It is consumed by `pkg/api/metrics` (for HTTP exposition) and by `cmd/root.go` (via `runUpdatesWithNotifications`, which calls `RegisterScan` after every cycle).
 
 ---
 
@@ -8,23 +8,36 @@ This package owns all Prometheus metric definitions and their registration for W
 
 ### `metrics.go`
 
-Defines the `Metrics` struct, its three Prometheus counters, and all functions for initialising and updating them.
+Defines the `Metric` and `Metrics` types and all functions for initialising and updating them.
 
 ---
 
 **Types:**
 
+#### `Metric`
+
+A plain data struct holding the counts from a single scan.
+
+| Field | Type | Description |
+|---|---|---|
+| `Scanned` | `int` | Number of containers inspected during the scan. |
+| `Updated` | `int` | Number of containers updated (includes stale containers for backwards compatibility). |
+| `Failed` | `int` | Number of containers that failed to update. |
+
+---
+
 #### `Metrics`
 
-Holds the three Prometheus counter vectors that track update session outcomes. All counters use the label `"status"` to distinguish between different result categories.
+Holds the Prometheus metrics and the channel used to process scan results asynchronously.
 
-| Field | Type | Metric name | Labels | Description |
+| Field | Type | Metric name | Kind | Description |
 |---|---|---|---|---|
-| `scanned` | `*prometheus.CounterVec` | `watchtower_containers_scanned` | — | Total number of containers inspected across all update sessions. |
-| `updated` | `*prometheus.CounterVec` | `watchtower_containers_updated` | — | Total number of containers successfully updated across all sessions. |
-| `failed` | `*prometheus.CounterVec` | `watchtower_containers_failed` | — | Total number of containers that failed to update across all sessions. |
-| `total` | `*prometheus.CounterVec` | `watchtower_scans_total` | — | Total number of update sessions run, including skipped (no-op) ones. |
-| `skipped` | `*prometheus.CounterVec` | `watchtower_scans_skipped` | — | Total number of update sessions that were skipped (i.e. `nil` report). |
+| `channel` | `chan *Metric` | — | — | Buffered channel (capacity 10) used to deliver `Metric` values to the background `HandleUpdate` goroutine. |
+| `scanned` | `prometheus.Gauge` | `watchtower_containers_scanned` | Gauge | Number of containers scanned during the **last** scan. Set (not incremented) on each scan. |
+| `updated` | `prometheus.Gauge` | `watchtower_containers_updated` | Gauge | Number of containers updated during the **last** scan. Set on each scan. |
+| `failed` | `prometheus.Gauge` | `watchtower_containers_failed` | Gauge | Number of containers that failed to update during the **last** scan. Set on each scan. |
+| `total` | `prometheus.Counter` | `watchtower_scans_total` | Counter | Total number of scans since Watchtower started, including skipped ones. |
+| `skipped` | `prometheus.Counter` | `watchtower_scans_skipped` | Counter | Total number of skipped scans since Watchtower started. |
 
 ---
 
@@ -32,7 +45,7 @@ Holds the three Prometheus counter vectors that track update session outcomes. A
 
 | Variable | Type | Description |
 |---|---|---|
-| `registered` | `*Metrics` | The singleton `Metrics` instance. Initialised once by the first call to `Default()`. |
+| `metrics` | `*Metrics` | The singleton `Metrics` instance. Initialised once by the first call to `Default()`. |
 
 ---
 
@@ -40,31 +53,51 @@ Holds the three Prometheus counter vectors that track update session outcomes. A
 
 ---
 
-#### `Default() *Metrics`
+#### `NewMetric(report types.Report) *Metric`
 
-Returns the singleton `Metrics` instance, creating and registering it if it has not yet been initialised. On first call, constructs all five `prometheus.CounterVec` instances and registers them with the default Prometheus registry. Calls `log.Fatal` if any counter cannot be registered. Subsequent calls return the already-initialised instance without re-registering.
+Constructs a `Metric` from a `types.Report`. `Updated` is set to `len(report.Updated()) + len(report.Stale())` — stale containers are folded in for backwards compatibility.
 
 ---
 
-#### `(m *Metrics) RegisterScan(report *types.Report)`
+#### `Default() *Metrics`
 
-Records the outcome of a single update session into the Prometheus counters. Behaviour depends on whether `report` is nil:
+Returns the singleton `Metrics` instance, creating it if it has not yet been initialised. On first call, constructs all five Prometheus metrics using `promauto` (which registers them automatically with the default registry) and starts a background goroutine running `HandleUpdate`. Subsequent calls return the already-initialised instance.
 
-- **`report` is `nil`** (skipped scan): Increments `watchtower_scans_total` and `watchtower_scans_skipped` by 1. The container-level counters are not touched.
-- **`report` is non-nil**: Increments `watchtower_scans_total` by 1, `watchtower_containers_scanned` by `report.Scanned()`, `watchtower_containers_updated` by `report.Updated()`, and `watchtower_containers_failed` by `report.Failed()`.
+---
 
-All counter increments use the `Add` method with a `float64` cast of the integer report values.
+#### `RegisterScan(metric *Metric)`
+
+Package-level convenience function. Calls `Default()` to obtain the singleton and then calls `Register` to enqueue the metric.
+
+---
+
+**Methods:**
+
+---
+
+#### `(metrics *Metrics) Register(metric *Metric)`
+
+Sends `metric` to the internal channel. Blocks if the channel buffer (capacity 10) is full. The actual Prometheus updates happen asynchronously in the `HandleUpdate` goroutine.
+
+---
+
+#### `(metrics *Metrics) QueueIsEmpty() bool`
+
+Returns `true` when no metrics are waiting in the channel. Used in tests to wait for the background goroutine to finish processing.
+
+---
+
+#### `(metrics *Metrics) HandleUpdate(channel <-chan *Metric)`
+
+Runs as a goroutine started by `Default()`. Processes each `*Metric` received from the channel:
+
+- **`nil` metric** (skipped scan): Increments `watchtower_scans_total` and `watchtower_scans_skipped` by 1. Resets the three gauges (`scanned`, `updated`, `failed`) to 0.
+- **Non-nil metric**: Increments `watchtower_scans_total` by 1. Sets `watchtower_containers_scanned`, `watchtower_containers_updated`, and `watchtower_containers_failed` to the values from the metric.
+
+Because the per-scan fields are Gauges rather than Counters, they always reflect the **most recent** scan, not a running total.
 
 ---
 
 ## Test Coverage
 
-`metrics_test.go` contains a Ginkgo spec suite for the `Metrics` type:
-
-| Test | Description |
-|---|---|
-| `Registered scan should set scan metrics` | Verifies that after calling `RegisterScan` with a report of `Scanned: 3, Updated: 2, Failed: 1`, the counters `watchtower_containers_scanned`, `watchtower_containers_updated`, and `watchtower_containers_failed` reflect those values when gathered from the Prometheus registry. |
-| `Skipped scan should only increment total and skipped` | Verifies that calling `RegisterScan(nil)` increments `watchtower_scans_total` and `watchtower_scans_skipped` by 1 each, while leaving the container-level counters at 0. |
-| `Multiple scans should accumulate` | Verifies that successive calls to `RegisterScan` (one real report followed by two `nil` reports) correctly accumulate: `watchtower_scans_total` reaches 3, `watchtower_scans_skipped` reaches 2, and the container counters reflect only the one real scan. |
-
-Each test creates a fresh `Metrics` instance directly (bypassing `Default()`) and uses `prometheus/testutil` to gather and compare counter values.
+There is no dedicated `metrics_test.go` file in this package.

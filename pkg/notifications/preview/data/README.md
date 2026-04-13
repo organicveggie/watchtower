@@ -1,6 +1,6 @@
 # `pkg/notifications/preview/data` Package
 
-This package provides all synthetic data used to render notification template previews. It has no runtime role — its sole purpose is to supply realistic-looking session state (container statuses, log entries, report summaries, and rendered preview strings) so that users and tests can validate custom `--notification-template` values without needing to run a real update cycle. It is consumed by `pkg/notifications/preview`.
+This package generates synthetic data for rendering notification template previews. It has no runtime role — its sole purpose is to produce realistic-looking session state (container report entries, log entries, and associated metadata) so that users and tests can validate custom `--notification-template` values without running a real update cycle. It is consumed by `pkg/notifications/preview`.
 
 ---
 
@@ -8,84 +8,162 @@ This package provides all synthetic data used to render notification template pr
 
 ### `data.go`
 
-Declares the synthetic `types.Report` used as the top-level input to template rendering.
+Defines the central `previewData` builder and its `staticData` helper. All synthetic data flows through a `previewData` instance.
 
-**Package-level Variables:**
+**Types:**
 
-#### `SlimReport types.Report`
+#### `previewData`
 
-A synthetic `types.Report` instance populated in `init()` with a representative set of container outcomes across all result categories. Constructed by calling `types.Report.All()` with a slice of `types.ContainerStatus` values. The containers and their outcomes are:
+The main builder struct. Holds a seeded random source, a monotonically advancing timestamp, a lazily-initialised `*report`, a running container count, a slice of generated log entries, and a `staticData` block.
 
-| Container name | Image | Result |
+| Field | Type | Description |
 |---|---|---|
-| `approvals` | `containrrr/watchtower:mytag-1` | Fresh |
-| `epicer` | `containrrr/watchtower:mytag-2` | Updated |
-| `contaner` | `containrrr/watchtower:mytag-3` | Failed |
-| `postfix` | `containrrr/watchtower:mytag-4` | Skipped |
-| `oauth2` | `containrrr/watchtower:mytag-5` | Scanned |
+| `rand` | `*rand.Rand` | Seeded with `1` for reproducible output. Used by all random-selection helpers. |
+| `lastTime` | `time.Time` | Initialised to 30 minutes before `New()` is called. Advanced by a random 0–29 second step each time `generateTime()` is called. |
+| `report` | `*report` | Lazily initialised on the first call to `addContainer`. |
+| `containerCount` | `int` | Incremented by `addContainer`; used by `generateName` and `generateImageName` to select names from the pool. |
+| `Entries` | `[]*logEntry` | Accumulated log entries, appended by `AddLogEntry`. |
+| `StaticData` | `staticData` | Fixed title (`"Title"`) and host (`"Host"`) strings available to templates. |
 
-Each `ContainerStatus` is built using `types.ContainerStatus.WithImageInfo()` to attach image name metadata, ensuring the rendered template has access to both the container name and its image reference.
+#### `staticData`
+
+Plain struct with `Title string` and `Host string`.
+
+---
+
+**Public Functions:**
+
+#### `New() *previewData`
+
+Returns a freshly initialised `previewData` with the random source seeded to `1`, `lastTime` set to 30 minutes in the past, empty `Entries`, and `StaticData` set to `{Title: "Title", Host: "Host"}`.
+
+---
+
+**Methods:**
+
+#### `(pb *previewData) AddFromState(state State)`
+
+Generates a synthetic container entry and appends it to the internal report. Produces random hex container and image IDs, selects a container name from the pool (cycling with a numeric suffix once exhausted), and derives an image name from the organisation name pool. For `FailedState` and `SkippedState`, a random error message is selected from the corresponding pool and stored as the container's error. Delegates to `addContainer`.
+
+#### `(pb *previewData) AddLogEntry(level LogLevel)`
+
+Appends a `logEntry` to `Entries`. Selects a message from `logErrors` for `FatalLevel`, `ErrorLevel`, and `WarnLevel`; selects from `logMessages` for all other levels. The entry's timestamp advances monotonically via `generateTime`.
+
+#### `(pb *previewData) Report() types.Report`
+
+Returns the internal `*report` as a `types.Report`. Returns `nil` if no containers have been added.
 
 ---
 
 ### `logs.go`
 
-Declares the synthetic log entries used to populate the legacy (non-report) template data path.
+Defines the log-entry type and log level constants used when generating synthetic log output.
 
-**Package-level Variables:**
+**Types:**
 
-#### `Entries []*log.Entry`
+#### `logEntry`
 
-A slice of pre-built Logrus `log.Entry` values populated in `init()`. Represents the log output that would be produced during a typical update session, covering a variety of log levels (`info`, `warn`, `error`) and messages. Used by `pkg/notifications/preview` when rendering templates that consume log entries rather than the structured report.
+| Field | Type | Description |
+|---|---|---|
+| `Message` | `string` | The log message text. |
+| `Data` | `map[string]any` | Additional structured fields (always an empty map in generated entries). |
+| `Time` | `time.Time` | The log entry timestamp. |
+| `Level` | `LogLevel` | The severity level. |
+
+#### `LogLevel`
+
+A `string` type representing a log severity level.
+
+| Constant | Value |
+|---|---|
+| `TraceLevel` | `"trace"` |
+| `DebugLevel` | `"debug"` |
+| `InfoLevel` | `"info"` |
+| `WarnLevel` | `"warning"` |
+| `ErrorLevel` | `"error"` |
+| `FatalLevel` | `"fatal"` |
+| `PanicLevel` | `"panic"` |
+
+**Public Functions:**
+
+#### `LevelsFromString(str string) []LogLevel`
+
+Parses a compact string of level characters and returns the corresponding `LogLevel` slice. Character mapping: `p` → Panic, `f` → Fatal, `e` → Error, `w` → Warn, `i` → Info, `d` → Debug, `t` → Trace. Unrecognised characters are silently skipped.
+
+#### `(level LogLevel) String() string`
+
+Returns the level's underlying string value.
 
 ---
 
 ### `preview_strings.go`
 
-Declares the expected rendered output strings for the built-in notification templates. These are used in tests to assert that a given template, when applied to `SlimReport` or `Entries`, produces the correct output.
-
-**Package-level Variables:**
+Declares the string pool arrays used by `data.go` when generating random container names, image names, and log messages.
 
 | Variable | Description |
 |---|---|
-| `LegacyTemplate string` | The expected rendered output of the default legacy (log-entry-based) notification template when applied to `Entries`. |
-| `ReportTemplate string` | The expected rendered output of the default report-based notification template when applied to `SlimReport`. |
-| `PorcelainTemplate string` | The expected rendered output of the `--porcelain v1` machine-readable template when applied to `SlimReport`. |
-
-All three are declared as package-level `var` strings and initialised as string literals.
+| `containerNames []string` | 40 synthetic container names (e.g. `"cyberscribe"`, `"quantumquill"`). Selected round-robin (with numeric suffixes when exhausted) by `generateName`. |
+| `organizationNames []string` | 39 synthetic organisation names (e.g. `"techwave"`, `"codecrafters"`). Used as image name prefixes by `generateImageName`. |
+| `errorMessages []string` | 42 error strings (e.g. `"Error 404: Resource not found"`). Used for `FailedState` containers. |
+| `skippedMessages []string` | 20 skip-reason strings (e.g. `"Fear of introducing new bugs"`). Used for `SkippedState` containers. |
+| `logMessages []string` | 13 informational log strings (e.g. `"Checking for available updates..."`). Used by `AddLogEntry` for non-error levels. |
+| `logErrors []string` | 5 error log strings (e.g. `"Update package download failed."`). Used by `AddLogEntry` for Warn/Error/Fatal levels. |
 
 ---
 
 ### `report.go`
 
-Provides a constructor for building synthetic `types.ContainerStatus` values used in `data.go`.
+Defines the `State` type, the internal `report` struct that implements `types.Report`, and a sort helper.
+
+**Types:**
+
+#### `State`
+
+A `string` type representing the outcome of a container in a session report.
+
+| Constant | Value | Character in `StatesFromString` |
+|---|---|---|
+| `ScannedState` | `"scanned"` | `c` |
+| `UpdatedState` | `"updated"` | `u` |
+| `FailedState` | `"failed"` | `e` |
+| `SkippedState` | `"skipped"` | `k` |
+| `StaleState` | `"stale"` | `t` |
+| `FreshState` | `"fresh"` | `f` |
+
+#### `report`
+
+Package-private struct implementing `types.Report`. Holds six slices of `types.ContainerReport`, one per state. Implements `Scanned()`, `Updated()`, `Failed()`, `Skipped()`, `Stale()`, `Fresh()`, and `All()`. `All()` merges all six slices, deduplicates by container ID (keeping the first occurrence in the order: updated → failed → skipped → stale → fresh → scanned), and sorts the result by container ID.
 
 **Public Functions:**
 
----
+#### `StatesFromString(str string) []State`
 
-#### `NewContainerStatus(name string, image string, result string) types.ContainerStatus`
-
-Creates and returns a `types.ContainerStatus` with the given container name, image name, and result string. Internally constructs a minimal `ContainerJSON` to satisfy the `ContainerStatus` interface, attaches image metadata via `WithImageInfo()`, and sets the result state. Used exclusively by `data.go` to populate `SlimReport`.
+Parses a compact string of state characters and returns the corresponding `State` slice. Uses the character mapping in the table above. Unrecognised characters are silently skipped.
 
 ---
 
 ### `status.go`
 
-Declares the string constants used as result identifiers when constructing synthetic container statuses in `report.go`.
+Defines the `containerStatus` struct, which implements the `types.ContainerReport` interface for use in preview reports.
 
-**Package-level Constants:**
+**Types:**
 
-| Constant | Value | Description |
+#### `containerStatus`
+
+| Field | Type | Description |
 |---|---|---|
-| `UpdatedStatus` | `"updated"` | Identifies a container that was successfully updated. |
-| `FreshStatus` | `"fresh"` | Identifies a container whose image was already up to date. |
-| `FailedStatus` | `"failed"` | Identifies a container whose update attempt failed. |
-| `SkippedStatus` | `"skipped"` | Identifies a container that was explicitly skipped. |
-| `ScannedStatus` | `"scanned"` | Identifies a container that was scanned but not updated. |
+| `containerID` | `wt.ContainerID` | Randomly generated hex ID. |
+| `oldImage` | `wt.ImageID` | Randomly generated hex ID representing the current image. |
+| `newImage` | `wt.ImageID` | Randomly generated hex ID representing the latest image. |
+| `containerName` | `string` | Selected from the `containerNames` pool. |
+| `imageName` | `string` | Derived from `organizationNames` + container name + `":latest"`. |
+| `error` | `error` | Non-nil for `FailedState` and `SkippedState` entries; `nil` otherwise. |
+| `state` | `State` | The container's outcome state. |
+
+Implements `types.ContainerReport` via methods: `ID()`, `Name()`, `CurrentImageID()`, `LatestImageID()`, `ImageName()`, `Error()` (returns `""` when `error` is nil), and `State()`.
 
 ---
 
 ## Test Coverage
 
-This package has no dedicated test file. The expected output strings declared in `preview_strings.go` are consumed by `pkg/notifications/preview` tests to assert correct template rendering.
+This package has no dedicated test file. Its types and functions are exercised through `pkg/notifications/preview` tests.

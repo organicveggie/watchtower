@@ -64,6 +64,7 @@ The main execution function for the root command. Orchestrates the full Watchtow
 - Waits for the Docker client to initialize
 - Runs a sanity check (e.g. rolling restart + linked containers)
 - If `--run-once`: runs one update cycle, sends notifications, and exits
+- Checks for multiple Watchtower instances running with the same scope (`actions.CheckForMultipleWatchtowerInstances`)
 - If HTTP API mode (`--http-api-update`): registers the `/v1/update` handler and optionally blocks periodic polling
 - If metrics mode (`--http-api-metrics`): registers the `/v1/metrics` handler
 - Starts the HTTP API server

@@ -77,6 +77,6 @@ Returns an error if the HTTP request fails or the registry responds with any sta
 | `CompareDigest` — digests differ | Placeholder test (no implementation body). |
 | `CompareDigest` — registry unavailable | Placeholder test (no implementation body). |
 | `CompareDigest` — no image info | Verifies that passing a container with a `nil` image info returns `false` and a non-nil error, without making any network requests. |
-| `CompareDigest` — DockerHub (integration) | Skipped unless `CI_INTEGRATION_TEST_REGISTRY_DH_USERNAME` / `CI_INTEGRATION_TEST_REGISTRY_DH_PASSWORD` are set. Currently has no assertion body. |
-| `CompareDigest` — GHCR (integration) | Skipped unless GHCR credentials are set. Currently has no assertion body. |
+| `using different registries` — DockerHub (integration) | Skipped unless `CI_INTEGRATION_TEST_REGISTRY_DH_USERNAME` / `CI_INTEGRATION_TEST_REGISTRY_DH_PASSWORD` are set. No assertion body — placeholder only. |
+| `using different registries` — GHCR (integration) | Skipped unless GHCR credentials are set. No assertion body — placeholder only. |
 | `GetDigest` — custom User-Agent | Uses a `ghttp` mock server to verify that HEAD requests include the expected `User-Agent: Watchtower/v0.0.0-unknown` header, and that the `Docker-Content-Digest` header value from the response is correctly returned. |

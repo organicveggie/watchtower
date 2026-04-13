@@ -102,6 +102,8 @@ Registers all flags related to sending notifications. Covers the modern Shoutrrr
 | `--notification-slack-hook-url` | `WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL` | Slack (or Discord) incoming webhook URL. Can reference a file. |
 | `--notification-slack-identifier` | `WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER` | Display name for Watchtower in Slack messages (default `watchtower`). |
 | `--notification-slack-channel` | `WATCHTOWER_NOTIFICATION_SLACK_CHANNEL` | Override the webhook's default Slack channel. |
+| `--notification-slack-icon-emoji` | `WATCHTOWER_NOTIFICATION_SLACK_ICON_EMOJI` | An emoji code string to use in place of the default icon. |
+| `--notification-slack-icon-url` | `WATCHTOWER_NOTIFICATION_SLACK_ICON_URL` | An icon image URL string to use in place of the default icon. |
 | `--notification-msteams-hook` | `WATCHTOWER_NOTIFICATION_MSTEAMS_HOOK_URL` | Microsoft Teams incoming webhook URL. Can reference a file. |
 | `--notification-msteams-data` | `WATCHTOWER_NOTIFICATION_MSTEAMS_USE_LOG_DATA` | Include structured log fields as Teams message facts. |
 | `--notification-gotify-url` | `WATCHTOWER_NOTIFICATION_GOTIFY_URL` | Gotify server URL. |
@@ -120,8 +122,10 @@ Initialises Viper with `AutomaticEnv()` and sets default values for all environm
 | `DOCKER_API_VERSION` | `DockerAPIMinVersion` (`"1.25"`) |
 | `WATCHTOWER_POLL_INTERVAL` | `86400` (24 hours) |
 | `WATCHTOWER_TIMEOUT` | `10s` |
+| `WATCHTOWER_NOTIFICATIONS` | `[]` (empty slice) |
 | `WATCHTOWER_NOTIFICATIONS_LEVEL` | `"info"` |
 | `WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT` | `25` |
+| `WATCHTOWER_NOTIFICATION_EMAIL_SUBJECTTAG` | `""` (empty string) |
 | `WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER` | `"watchtower"` |
 | `WATCHTOWER_LOG_LEVEL` | `"info"` |
 | `WATCHTOWER_LOG_FORMAT` | `"auto"` |

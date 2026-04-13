@@ -97,4 +97,7 @@ Constructs the challenge URL for the registry hosting `imageRef`. Calls `helpers
 | `GetAuthURL` — three-segment image names | Verifies that `piksel/containrrr/watchtower` and `ghcr.io/piksel/containrrr/watchtower` both produce a scope of `piksel/containrrr/watchtower`. |
 | `GetAuthURL` — non-Docker Hub single-segment images | Verifies that `ghcr.io/watchtower` produces a scope of `watchtower` (no `library/` prefix added for non-hub registries). |
 | `GetAuthURL` — trailing comma in challenge | Verifies that a challenge string with a trailing empty field (e.g. `...,scope="...",`) does not panic and returns a valid URL without error. |
-| `GetAuthURL` — empty key-value pair | Verifies robustness against a challenge string containing a bare `=` with no key. |
+| `GetAuthURL` — valueless key | Verifies robustness against a challenge string containing a key with no `=` and no value (e.g. `valuelesskey`). |
+| `GetChallengeURL` — explicit non-hub registry | Verifies that `ghcr.io/containrrr/watchtower:latest` produces `https://ghcr.io/v2/`. |
+| `GetChallengeURL` — no explicit registry | Verifies that an image ref with no registry (e.g. `containrrr/watchtower:latest`) defaults to `https://index.docker.io/v2/`. |
+| `GetChallengeURL` — `docker.io` normalised | Verifies that `docker.io/containrrr/watchtower:latest` resolves to `https://index.docker.io/v2/`. |

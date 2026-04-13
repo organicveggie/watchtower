@@ -31,4 +31,4 @@ The function has no side effects and does not interact with the Docker daemon or
 
 ## Test Coverage
 
-This package has no dedicated test file. Its behaviour is exercised indirectly by the `tplprev` tool's native and WebAssembly entry points, and by the expected output strings declared in `pkg/notifications/preview/data/preview_strings.go`.
+This package has no dedicated test file. Its behaviour is exercised indirectly by the `tplprev` tool's native and WebAssembly entry points.

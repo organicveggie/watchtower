@@ -54,7 +54,7 @@ The `http.HandlerFunc` that processes incoming update requests. Its behaviour de
 
 - **Without images**: Attempts to acquire the lock without blocking (using a `select`/`default`). If the lock is available, calls `fn` with a `nil` image list to update all matched containers. If another update is already running, logs a debug message and returns immediately without triggering a new cycle. This prevents unbounded queuing of full-scan updates.
 
-In both cases the lock is released via a deferred send once `fn` returns. The request body is drained and discarded before dispatching.
+In both cases the lock is released via a deferred send once `fn` returns. The request body is copied to `os.Stdout` before dispatching.
 
 ---
 

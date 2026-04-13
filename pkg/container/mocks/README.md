@@ -18,10 +18,10 @@ Also declares the canonical set of named `ContainerRef` variables representing t
 
 | Variable | Type | Description |
 |---|---|---|
-| `defaultImage` | `imageRef` | The default image used by watchtower containers in fixtures (`sha256:4dbc5f...`, tagged `containrrr/watchtower:latest`). |
+| `defaultImage` | `imageRef` | The default image used by watchtower containers in fixtures (`sha256:4dbc5f...`, tagged `portainer/portainer:latest`). |
 | `Watchtower` | `ContainerRef` | A running watchtower container fixture. |
 | `Stopped` | `ContainerRef` | A stopped (exited) container fixture. |
-| `Running` | `ContainerRef` | A running non-watchtower container fixture (portainer image). |
+| `Running` | `ContainerRef` | A running non-watchtower container fixture (watchtower image). |
 | `Restarting` | `ContainerRef` | A restarting container fixture. |
 | `NetConsumerOK` | `ContainerRef` | A container using `network_mode: container:...` with a resolvable network supplier. |
 | `NetConsumerInvalidSupplier` | `ContainerRef` | A container referencing a network supplier container that does not exist. |
@@ -45,7 +45,7 @@ Returns a `ghttp` response handler that reads the JSON file at `relPath` and res
 Accepts one or more `ContainerRef` values and returns a slice of `http.HandlerFunc` values suitable for appending to a `ghttp.Server`. For each ref it produces:
 
 1. A handler for `GET /containers/{id}/json` that responds with the container's fixture JSON (or a 404 if `isMissing` is set).
-2. Handlers for any containers that the ref references (e.g. a network supplier), recursively.
+2. Handlers for any containers that the ref directly references (e.g. a network supplier), one level deep.
 3. A handler for `GET /images/{imageID}/json` that responds with the image fixture JSON.
 
 This is the primary entry point for setting up a mock Docker daemon in container client tests.
@@ -179,8 +179,8 @@ The `data/` subdirectory contains JSON files that represent real Docker API resp
 
 | File | Image | Description |
 |---|---|---|
-| `image_default.json` | `portainer/portainer:latest` | Default image used by the running container fixture. |
-| `image_running.json` | `containrrr/watchtower:latest` | Image used by the watchtower container fixtures. |
+| `image_default.json` | `portainer/portainer:latest` | Default image used by the `Watchtower`, `Stopped`, and `Restarting` container fixtures. |
+| `image_running.json` | `containrrr/watchtower:latest` | Image used by the `Running` container fixture. |
 | `image_net_producer.json` | `qmcgaw/gluetun:latest` | Image used by the network supplier container fixture. |
 | `image_net_consumer.json` | `nginx:latest` | Image used by the network consumer container fixture. |
 

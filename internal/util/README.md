@@ -68,7 +68,7 @@ Provides random SHA-256-style hash generation. Used in tests (`pkg/container/cli
 
 #### `GenerateRandomSHA256() string`
 
-Generates and returns a random 64-character lowercase hexadecimal string representing a SHA-256 hash. The returned string does not include a `sha256:` prefix. Uses `crypto/rand` for cryptographically secure random bytes.
+Returns a random 64-character lowercase hexadecimal string representing a SHA-256 hash, without a `sha256:` prefix. Implemented by calling `GenerateRandomPrefixedSHA256()` and stripping the leading `sha256:` prefix.
 
 ---
 

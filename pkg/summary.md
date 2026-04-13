@@ -61,7 +61,7 @@ The primary interface between Watchtower and the Docker daemon.
 ### Supported Labels
 
 | Category | Labels |
-|---|---|
+| -------- | ------ |
 | Identity | `com.centurylinklabs.watchtower` |
 | Control | `enable`, `monitor-only`, `no-pull`, `stop-signal`, `scope`, `depends-on` |
 | Lifecycle hooks | `lifecycle.pre-check`, `lifecycle.post-check`, `lifecycle.pre-update`, `lifecycle.post-update`, `lifecycle.pre-update-timeout`, `lifecycle.post-update-timeout` |

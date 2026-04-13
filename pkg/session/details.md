@@ -21,7 +21,7 @@ Defines the `State` enum and the `ContainerStatus` type that implements the `typ
 An integer enum representing the lifecycle state of a container within a session.
 
 | Constant | Description |
-|---|---|
+| -------- | ----------- |
 | `UnknownState` | Default zero value. Used to represent an uninitialised state; should not appear in a completed report. |
 | `SkippedState` | The container was explicitly skipped (e.g. via a lifecycle hook exit code or `monitor-only`). |
 | `ScannedState` | The container was inspected but its final state has not yet been determined. Transitional — resolved to `Fresh`, `Updated`, `Failed`, or `Stale` by `NewReport`. |
@@ -38,7 +38,7 @@ Holds the per-container state captured during a session and implements `types.Co
 unexported; values are set by `UpdateFromContainer` and mutated by `Progress` methods.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `containerID` | `wt.ContainerID` | The container's full ID. |
 | `oldImage` | `wt.ImageID` | The image ID the container was running at the start of the session. |
 | `newImage` | `wt.ImageID` | The newest image ID found during the session. Equals `oldImage` if no newer image was found. |
@@ -50,7 +50,7 @@ unexported; values are set by `UpdateFromContainer` and mutated by `Progress` me
 **Public Methods on `ContainerStatus`:**
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `ID()` | `wt.ContainerID` | Returns `containerID`. |
 | `Name()` | `string` | Returns `containerName`. |
 | `CurrentImageID()` | `wt.ImageID` | Returns `oldImage` — the image the container was running at session start. |
@@ -158,7 +158,7 @@ All six result slices are sorted by container ID (lexicographic on `types.Contai
 **`report` Methods (implementing `types.Report`):**
 
 | Method | Description |
-|---|---|
+| ------ | ----------- |
 | `Scanned()` | Returns all containers that were inspected (excludes skipped). |
 | `Updated()` | Returns containers successfully updated. |
 | `Failed()` | Returns containers whose update failed. |

@@ -23,7 +23,7 @@ The interface through which all of Watchtower's Docker interactions are performe
 the mock client in `internal/actions/mocks`.
 
 | Method | Description |
-|---|---|
+| ------ | ----------- |
 | `ListContainers(types.Filter) ([]types.Container, error)` | Returns all containers matched by the supplied filter. |
 | `GetContainer(containerID types.ContainerID) (types.Container, error)` | Returns the full details of a single container by ID. |
 | `StopContainer(types.Container, time.Duration) error` | Sends a stop signal to a container and waits for it to exit, then removes it. |
@@ -41,7 +41,7 @@ the mock client in `internal/actions/mocks`.
 Configuration struct passed to `NewClient` to control the behaviour of the Docker client wrapper.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `RemoveVolumes` | `bool` | Remove anonymous volumes when a container is removed. |
 | `IncludeStopped` | `bool` | Include created and exited containers in listings. |
 | `ReviveStopped` | `bool` | Start stopped containers that have had their image updated. |
@@ -55,7 +55,7 @@ Configuration struct passed to `NewClient` to control the behaviour of the Docke
 A string type that controls warning behaviour for failed registry HEAD requests.
 
 | Constant | Description |
-|---|---|
+| -------- | ----------- |
 | `WarnAlways` | Always emit a warning when a HEAD request fails. |
 | `WarnNever` | Never emit a warning when a HEAD request fails. |
 | `WarnAuto` | Emit a warning only for registries known to rate-limit (Docker Hub, ghcr.io). |
@@ -65,7 +65,7 @@ A string type that controls warning behaviour for failed registry HEAD requests.
 **Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `defaultStopSignal` | `"SIGTERM"` | The signal sent to a container when no custom stop signal label is set. |
 
 ---
@@ -167,7 +167,7 @@ skipped without being treated as a failure. Any other non-zero exit code returns
 **Internal Helpers in `client.go`:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `createListFilter()` | Builds a Docker API filter argument including `running` and optionally `created`, `exited`, and `restarting` statuses based on `ClientOptions`. |
 | `HasNewImage(ctx, container)` | Inspects the image referenced by the container's image name and compares its ID to the container's current image ID. |
 | `PullImage(ctx, container)` | Pulls the latest image for a container. First attempts a digest comparison via `digest.CompareDigest` to skip the pull if the image is already up to date. Rejects pinned (`sha256:`) images with an error. |
@@ -190,7 +190,7 @@ The core container type. Wraps the Docker SDK's `ContainerJSON` and `ImageInspec
 interface over them.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `LinkedToRestarting` | `bool` | Set by `UpdateImplicitRestart` when a dependency of this container is being restarted. |
 | `Stale` | `bool` | Set during the update scan when a newer image is found for this container. |
 | `containerInfo` | `*types.ContainerJSON` | The raw Docker container inspection result. |
@@ -209,7 +209,7 @@ Factory function. Returns a new `Container` wrapping the supplied Docker SDK str
 **`Container` Methods:**
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `ContainerInfo()` | `*types.ContainerJSON` | Returns the raw Docker container inspection data. |
 | `ID()` | `types.ContainerID` | Returns the container's full ID. |
 | `IsRunning()` | `bool` | Returns `true` if `State.Running` is true. |
@@ -247,7 +247,7 @@ Factory function. Returns a new `Container` wrapping the supplied Docker SDK str
 **Internal Helpers in `container.go`:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `getContainerOrGlobalBool(globalVal, label, contPrecedence)` | Combines a global boolean flag with a per-container label value, respecting the label-precedence setting. Used by `IsMonitorOnly` and `IsNoPull`. |
 
 ---
@@ -260,7 +260,7 @@ Declares all Docker label key constants used by Watchtower and provides low-leve
 **Constants:**
 
 | Constant | Label Key |
-|---|---|
+| -------- | --------- |
 | `watchtowerLabel` | `com.centurylinklabs.watchtower` |
 | `signalLabel` | `com.centurylinklabs.watchtower.stop-signal` |
 | `enableLabel` | `com.centurylinklabs.watchtower.enable` |
@@ -290,7 +290,7 @@ by `IsWatchtower()` and by `filters.WatchtowerContainersFilter`.
 **Internal Helpers in `metadata.go`:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `getLabelValueOrEmpty(label)` | Returns the value of a label from the container's config, or an empty string if the label is absent. |
 | `getLabelValue(label)` | Returns the value of a label and a boolean indicating whether it was present. |
 | `getBoolLabelValue(label)` | Parses a label value as a boolean. Returns `errorLabelNotFound` if the label is absent, or a `strconv` error if the value cannot be parsed. |
@@ -317,7 +317,7 @@ cannot be read.
 **Internal Helpers in `cgroup_id.go`:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `getRunningContainerIDFromString(s string)` | Applies `dockerContainerPattern` (a regexp matching 64-character hex strings following `/docker/`) to a cgroup file's contents and returns the first captured container ID, or an empty string. |
 
 ---
@@ -327,7 +327,7 @@ cannot be read.
 Declares the package-level sentinel errors returned by `Container` methods and `VerifyConfiguration`.
 
 | Error | Description |
-|---|---|
+| ----- | ----------- |
 | `errorNoImageInfo` | Returned when an operation requires image info but `imageInfo` is nil. |
 | `errorNoContainerInfo` | Returned by `VerifyConfiguration` when `containerInfo` is nil. |
 | `errorInvalidConfig` | Returned by `VerifyConfiguration` when the container or host config within `containerInfo` is nil. |
@@ -338,7 +338,7 @@ Declares the package-level sentinel errors returned by `Container` methods and `
 ## Test Coverage
 
 | File | Description |
-|---|---|
+| ---- | ----------- |
 | `container_suite_test.go` | Bootstraps the Ginkgo test suite for the `container_test` package. |
 | `container_mock_test.go` | Defines `MockContainer` and a set of `MockContainerUpdate` option functions (`WithPortBindings`, `WithImageName`, `WithLinks`, `WithLabels`, `WithContainerState`, `WithHealthcheck`, `WithImageHealthcheck`) used to construct `Container` values for tests without needing a live Docker daemon. |
 | `container_test.go` | Tests `Container` methods covering: `VerifyConfiguration` (all nil-field error cases and the port binding compatibility fix), `GetCreateConfig` (healthcheck delta computation including matching, differing, empty, and nil configs), label accessors (`Name`, `ID`, `Enabled`, `IsWatchtower`, `StopSignal`, `ImageName`, `Links`, `IsNoPull`, `PreUpdateTimeout`, `PostUpdateTimeout`), and the zodiac label fallback. |

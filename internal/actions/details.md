@@ -93,7 +93,7 @@ Operates in-place on the slice. Containers that are already marked for restart a
 These unexported functions implement the detailed mechanics of the update sequence:
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `performRollingRestart(containers, client, params)` | Stops and restarts containers one at a time in reverse dependency order. Collects failures and optionally cleans up old images after each successful update. |
 | `stopContainersInReversedOrder(containers, client, params)` | Stops all containers marked for restart, iterating in reverse dependency order. Returns a map of failures and a set of image IDs that were running before the stop. |
 | `restartContainersInSortedOrder(containers, client, params, stoppedImages)` | Restarts containers in forward dependency order, but only for images that were confirmed stopped. Optionally cleans up old images afterwards. |
@@ -108,6 +108,6 @@ These unexported functions implement the detailed mechanics of the update sequen
 ## Test Coverage
 
 | File | Description |
-|---|---|
+| ---- | ----------- |
 | `actions_suite_test.go` | Bootstraps the Ginkgo test suite. Contains tests for `CheckForMultipleWatchtowerInstances` covering empty input, single-instance, multi-instance, and image cleanup scenarios. |
 | `update_test.go` | Covers `Update` and `UpdateImplicitRestart` across a wide range of scenarios including cleanup deduplication, monitor-only mode, label precedence, rolling restarts, lifecycle hook exit codes, linked container propagation, and stopped/restarting container handling. |

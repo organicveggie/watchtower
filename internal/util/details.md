@@ -58,7 +58,7 @@ running container before starting a new instance under the original name.
 **Variables:**
 
 | Variable | Description |
-|---|---|
+| -------- | ----------- |
 | `letters` | The alphabet of characters used when generating random names: `a–z` and `A–Z`. |
 
 **Public Functions:**
@@ -102,7 +102,7 @@ bytes.
 `util_test.go` covers all functions in `util.go` and both functions in `rand_sha256.go`:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `TestSliceEqual_True` | Verifies that two identical slices are considered equal. |
 | `TestSliceEqual_DifferentLengths` | Verifies that slices of different lengths are not equal. |
 | `TestSliceEqual_DifferentContents` | Verifies that slices of the same length but different contents are not equal. |

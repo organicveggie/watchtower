@@ -97,7 +97,7 @@ handler.
 These unexported functions support the public surface but are worth noting for maintainers:
 
 | Function | Description |
-| --- | --- |
+| -------- | ----------- |
 | `logNotifyExit(err)` | Logs an error, closes the notifier, and exits with code 1 |
 | `awaitDockerClient()` | Sleeps 1 second to allow the Docker client to initialize |
 | `formatDuration(d)` | Formats a `time.Duration` into a human-readable string (e.g. `"1 hour, 30 minutes"`) |

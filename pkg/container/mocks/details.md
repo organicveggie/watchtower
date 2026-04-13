@@ -23,7 +23,7 @@ data, and defines the image references they depend on.
 **Package-level Variables:**
 
 | Variable | Type | Description |
-|---|---|---|
+| -------- | ---- | ----------- |
 | `defaultImage` | `imageRef` | The default image used by watchtower containers in fixtures (`sha256:4dbc5f...`, tagged `portainer/portainer:latest`). |
 | `Watchtower` | `ContainerRef` | A running watchtower container fixture. |
 | `Stopped` | `ContainerRef` | A stopped (exited) container fixture. |
@@ -113,7 +113,7 @@ its parents. If not found, responds with HTTP 404.
 A boolean type alias used to make handler construction calls self-documenting.
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `Found` | `true` | The resource exists; respond with success. |
 | `Missing` | `false` | The resource does not exist; respond with 404. |
 
@@ -134,7 +134,7 @@ Embeds `mock.Mock` and implements all methods of `types.FilterableContainer`. Ea
 `AssertExpectations(t)`.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `Enabled()` | `(bool, bool)` | Returns whether the container's enable label is set and its value. |
 | `IsWatchtower()` | `bool` | Returns whether the container is a Watchtower instance. |
 | `Name()` | `string` | Returns the container name. |
@@ -155,7 +155,7 @@ handler generation in `ApiServer.go` and map container names to their fixture JS
 Describes a Docker image used by a mock container.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `id` | `types.ImageID` | The full SHA256 image ID. |
 | `file` | `string` | The base filename (without path or extension) of the image's JSON fixture under `mocks/data/`. |
 
@@ -164,7 +164,7 @@ Describes a Docker image used by a mock container.
 Describes a mock container, including how to locate its fixture data and any containers it references.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `name` | `string` | The container name. |
 | `id` | `types.ContainerID` | The container ID. |
 | `image` | `*imageRef` | The image used by this container. |
@@ -191,7 +191,7 @@ daemon. They are loaded by `RespondWithJSONFile` and `ListContainersHandler` at 
 **Container fixtures** (`GET /containers/{id}/json`):
 
 | File | Container | Description |
-|---|---|---|
+| ---- | --------- | ----------- |
 | `container_watchtower.json` | `watchtower` | A running watchtower container. |
 | `container_running.json` | `running` | A running portainer container. |
 | `container_stopped.json` | `stopped` | An exited watchtower container. |
@@ -203,7 +203,7 @@ daemon. They are loaded by `RespondWithJSONFile` and `ListContainersHandler` at 
 **Image fixtures** (`GET /images/{id}/json`):
 
 | File | Image | Description |
-|---|---|---|
+| ---- | ----- | ----------- |
 | `image_default.json` | `portainer/portainer:latest` | Default image used by the `Watchtower`, `Stopped`, and `Restarting` container fixtures. |
 | `image_running.json` | `containrrr/watchtower:latest` | Image used by the `Running` container fixture. |
 | `image_net_producer.json` | `qmcgaw/gluetun:latest` | Image used by the network supplier container fixture. |
@@ -212,5 +212,5 @@ daemon. They are loaded by `RespondWithJSONFile` and `ListContainersHandler` at 
 **Container list fixture** (`GET /containers/json`):
 
 | File | Description |
-|---|---|
+| ---- | ----------- |
 | `containers.json` | An array of all available containers in summary form, used by `ListContainersHandler` and filtered by status before being returned. |

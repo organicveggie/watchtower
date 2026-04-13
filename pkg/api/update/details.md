@@ -17,7 +17,7 @@ is solely responsible for receiving HTTP requests and dispatching them to the pr
 **Package-level Variables:**
 
 | Variable | Type | Description |
-|---|---|---|
+| -------- | ---- | ----------- |
 | `lock` | `chan bool` | A shared channel used to ensure only one update cycle runs at a time. Accepts an externally provided lock from `cmd/root.go` (shared with the scheduler), or creates its own if none is provided. |
 
 ---
@@ -29,7 +29,7 @@ is solely responsible for receiving HTTP requests and dispatching them to the pr
 Represents the update trigger HTTP endpoint. Fields:
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `fn` | `func(images []string)` | The update function to invoke when a request is received. Provided by the caller at construction time; typically `runUpdatesWithNotifications` from `cmd/root.go`. |
 | `Path` | `string` | The URL path at which the handler is registered. Always `"/v1/update"`. |
 

@@ -23,7 +23,7 @@ Defines the `Metric` and `Metrics` types and all functions for initialising and 
 A plain data struct holding the counts from a single scan.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Scanned` | `int` | Number of containers inspected during the scan. |
 | `Updated` | `int` | Number of containers updated (includes stale containers for backwards compatibility). |
 | `Failed` | `int` | Number of containers that failed to update. |
@@ -35,7 +35,7 @@ A plain data struct holding the counts from a single scan.
 Holds the Prometheus metrics and the channel used to process scan results asynchronously.
 
 | Field | Type | Metric name | Kind | Description |
-|---|---|---|---|---|
+| ----- | ---- | ----------- | ---- | ----------- |
 | `channel` | `chan *Metric` | — | — | Buffered channel (capacity 10) used to deliver `Metric` values to the background `HandleUpdate` goroutine. |
 | `scanned` | `prometheus.Gauge` | `watchtower_containers_scanned` | Gauge | Number of containers scanned during the **last** scan. Set (not incremented) on each scan. |
 | `updated` | `prometheus.Gauge` | `watchtower_containers_updated` | Gauge | Number of containers updated during the **last** scan. Set on each scan. |
@@ -48,7 +48,7 @@ Holds the Prometheus metrics and the channel used to process scan results asynch
 **Package-level Variables:**
 
 | Variable | Type | Description |
-|---|---|---|
+| -------- | ---- | ----------- |
 | `metrics` | `*Metrics` | The singleton `Metrics` instance. Initialised once by the first call to `Default()`. |
 
 ---

@@ -21,7 +21,7 @@ per-container behaviour.
 A named string type representing a Docker image content hash. Typically a full `sha256:<64 hex chars>` string.
 
 | Method | Description |
-|---|---|
+| ------ | ----------- |
 | `ShortID() string` | Returns a 12-character short form of the image ID, stripping the `sha256:` prefix if present. Delegates to the private `shortID` helper. |
 
 ---
@@ -31,7 +31,7 @@ A named string type representing a Docker image content hash. Typically a full `
 A named string type representing a Docker container instance ID.
 
 | Method | Description |
-|---|---|
+| ------ | ----------- |
 | `ShortID() string` | Returns a 12-character short form of the container ID, stripping the `sha256:` prefix if present. Delegates to the private `shortID` helper. |
 
 ---
@@ -57,7 +57,7 @@ The central abstraction for a Docker container. Implemented by `pkg/container.Co
 codebase.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `ContainerInfo()` | `*types.ContainerJSON` | Returns the raw Docker container inspection data. |
 | `ID()` | `ContainerID` | Returns the container's full ID. |
 | `IsRunning()` | `bool` | Returns whether the container is in the running state. |
@@ -103,7 +103,7 @@ Defines the parameter struct passed to `internal/actions.Update` and propagated 
 Bundles all runtime options that govern the behaviour of a single update session.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Filter` | `Filter` | The container filter function built from CLI flags and container names. |
 | `Cleanup` | `bool` | Remove old images after a successful update. |
 | `NoRestart` | `bool` | Do not restart containers after updating their image. |
@@ -144,7 +144,7 @@ A subset of the `Container` interface exposing only the fields needed to evaluat
 prevents filters from depending on the full `Container` interface and makes mocking easier.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `Name()` | `string` | The container name. |
 | `IsWatchtower()` | `bool` | Whether the container is a Watchtower instance. |
 | `Enabled()` | `(bool, bool)` | The enable label value and whether it was set. |
@@ -165,7 +165,7 @@ The contract for any notification service. Consumed by `cmd/root.go` which holds
 `StartNotification` / `SendNotification` around each update cycle, and `Close` on shutdown.
 
 | Method | Description |
-|---|---|
+| ------ | ----------- |
 | `StartNotification()` | Begins accumulating log entries for the current notification batch. |
 | `SendNotification(Report)` | Flushes the accumulated entries and the session report, rendering and dispatching the notification. |
 | `AddLogHook()` | Registers the notifier as a Logrus hook so it receives log entries automatically. |
@@ -188,7 +188,7 @@ Implemented by the four legacy notifier types (`emailTypeNotifier`, `slackTypeNo
 configs into Shoutrrr URLs.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `GetURL(c *cobra.Command)` | `(string, error)` | Builds and returns the Shoutrrr URL equivalent of the notifier's current configuration. |
 
 ---
@@ -199,7 +199,7 @@ An optional extension of `ConvertibleNotifier`. Currently implemented only by `e
 assertion in `AppendLegacyUrls` to determine whether to apply a per-notifier send delay.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `GetDelay()` | `time.Duration` | Returns the delay to apply before sending notifications for this service. |
 
 ---
@@ -215,7 +215,7 @@ Defines the two interfaces that make up the session report consumed by the notif
 Implemented by `pkg/session.report`. Represents the immutable result of a completed update session.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `Scanned()` | `[]ContainerReport` | All containers inspected (excluding skipped). |
 | `Updated()` | `[]ContainerReport` | Containers successfully updated. |
 | `Failed()` | `[]ContainerReport` | Containers whose update failed. |
@@ -232,7 +232,7 @@ Implemented by `pkg/session.ContainerStatus` and `pkg/notifications/preview/data
 per-container result within a session report.
 
 | Method | Return type | Description |
-|---|---|---|
+| ------ | ----------- | ----------- |
 | `ID()` | `ContainerID` | The container's ID. |
 | `Name()` | `string` | The container name. |
 | `CurrentImageID()` | `ImageID` | The image ID the container was running at session start. |
@@ -255,7 +255,7 @@ A simple struct holding a username and password for basic registry authenticatio
 `pkg/registry/digest.TransformAuth` when unmarshalling a base64-encoded Docker config auth JSON blob.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Username` | `string` | The registry username. |
 | `Password` | `string` | The registry password or access token. |
 
@@ -272,7 +272,7 @@ Defines the JSON response type returned by a registry token endpoint.
 Unmarshalled from the JSON body of a successful bearer token exchange in `pkg/registry/auth.GetBearerHeader`.
 
 | Field | Type | JSON key | Description |
-|---|---|---|---|
+| ----- | ---- | -------- | ----------- |
 | `Token` | `string` | `"token"` | The bearer token returned by the registry's auth endpoint. |
 
 ---

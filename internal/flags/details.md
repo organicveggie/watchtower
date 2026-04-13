@@ -17,7 +17,7 @@ concerns such as secret file resolution, alias expansion, and logging setup.
 **Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `DockerAPIMinVersion` | `"1.25"` | The minimum Docker API version required by Watchtower. Used as the default value for the `--api-version` flag. |
 
 ---
@@ -31,7 +31,7 @@ concerns such as secret file resolution, alias expansion, and logging setup.
 Registers the three flags that are passed directly to the Docker API client:
 
 | Flag | Env Var | Description |
-|---|---|---|
+| ---- | ------- | ----------- |
 | `--host, -H` | `DOCKER_HOST` | Docker daemon socket to connect to. |
 | `--tlsverify, -v` | `DOCKER_TLS_VERIFY` | Enable TLS and verify the remote daemon's certificate. |
 | `--api-version, -a` | `DOCKER_API_VERSION` | Docker API version for the client to use. |
@@ -44,7 +44,7 @@ Registers all flags that control Watchtower's runtime behaviour. These cover sch
 strategy, and HTTP API configuration. The full set of flags registered is:
 
 | Flag | Env Var | Description |
-|---|---|---|
+| ---- | ------- | ----------- |
 | `--interval, -i` | `WATCHTOWER_POLL_INTERVAL` | How often (in seconds) to check for image updates. |
 | `--schedule, -s` | `WATCHTOWER_SCHEDULE` | Cron expression defining the update schedule. Mutually exclusive with `--interval`. |
 | `--stop-timeout, -t` | `WATCHTOWER_TIMEOUT` | Duration to wait before forcefully stopping a container. |
@@ -84,7 +84,7 @@ Registers all flags related to sending notifications. Covers the modern Shoutrrr
 legacy per-service flags (email, Slack, MSTeams, Gotify) that are retained for backwards compatibility.
 
 | Flag | Env Var | Description |
-|---|---|---|
+| ---- | ------- | ----------- |
 | `--notifications, -n` | `WATCHTOWER_NOTIFICATIONS` | Notification types to enable (`email`, `slack`, `msteams`, `gotify`, `shoutrrr`). |
 | `--notifications-level` | `WATCHTOWER_NOTIFICATIONS_LEVEL` | Minimum log level that triggers a notification. |
 | `--notifications-delay` | `WATCHTOWER_NOTIFICATIONS_DELAY` | Seconds to wait before sending a notification batch. |
@@ -124,7 +124,7 @@ Initialises Viper with `AutomaticEnv()` and sets default values for all environm
 called before any flag registration. Key defaults include:
 
 | Variable | Default |
-|---|---|
+| -------- | ------- |
 | `DOCKER_HOST` | `unix:///var/run/docker.sock` |
 | `DOCKER_API_VERSION` | `DockerAPIMinVersion` (`"1.25"`) |
 | `WATCHTOWER_POLL_INTERVAL` | `86400` (24 hours) |
@@ -191,7 +191,7 @@ Reads `--log-format` and `--log-level` from the flag set and applies them to the
 and their effects:
 
 | Format | Behaviour |
-|---|---|
+| ------ | --------- |
 | `auto` | `TextFormatter` with colour support driven by the terminal and `NO_COLOR`/`CLICOLOR` environment variables. |
 | `json` | `JSONFormatter`. |
 | `logfmt` | `TextFormatter` with colours disabled and full timestamps enabled. |
@@ -204,7 +204,7 @@ Returns an error if the format string or level string is not recognised.
 ## Internal Helpers
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `envString(key)` | Binds a Viper key to its environment variable and returns the current string value. |
 | `envStringSlice(key)` | Binds a Viper key to its environment variable and returns the current string slice value. |
 | `envInt(key)` | Binds a Viper key to its environment variable and returns the current integer value. |
@@ -225,7 +225,7 @@ Returns an error if the format string or level string is not recognised.
 `flags_test.go` covers the following scenarios:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `TestEnvConfig_Defaults` | Verifies that `EnvConfig` writes the default `DOCKER_HOST` and clears `DOCKER_TLS_VERIFY` when no flags are set. |
 | `TestEnvConfig_Custom` | Verifies that custom `--host`, `--tlsverify`, and `--api-version` values are correctly propagated to environment variables. |
 | `TestGetSecretsFromFilesWithString` | Verifies that a plain string value is left unchanged by `GetSecretsFromFiles`. |

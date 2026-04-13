@@ -23,7 +23,7 @@ The shared `text/template` function map registered on every template parsed by W
 functions to template authors:
 
 | Function | Signature | Description |
-|---|---|---|
+| -------- | --------- | ----------- |
 | `ToUpper` | `func(string) string` | Converts a string to upper case. Delegates to `strings.ToUpper`. |
 | `ToLower` | `func(string) string` | Converts a string to lower case. Delegates to `strings.ToLower`. |
 | `Title` | `func(string) string` | Converts a string to title case using American English rules. Delegates to `golang.org/x/text/cases`. |
@@ -34,7 +34,7 @@ functions to template authors:
 **Internal Helpers:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `toJSON(v interface{}) string` | The implementation behind the `ToJSON` template function. Calls `json.MarshalIndent` with a 2-space indent. On error, returns a human-readable error string of the form `"failed to marshal JSON in notification template: <err>"` so that template rendering continues rather than failing silently or panicking. |
 
 ---

@@ -16,7 +16,7 @@ Defines the `API` type and all of its methods. Uses the standard library `net/ht
 **Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `tokenMissingMsg` | `"api token is empty or has not been set. exiting"` | The fatal log message emitted if `Start` is called with no token set but at least one handler registered. |
 
 ---
@@ -28,7 +28,7 @@ Defines the `API` type and all of its methods. Uses the standard library `net/ht
 The central API server instance. Fields:
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Token` | `string` | The bearer token that all incoming requests must present in their `Authorization` header. Set at construction time via `New`. |
 | `hasHandlers` | `bool` | Internal flag set to `true` when at least one handler or function has been registered. Used by `Start` to decide whether to actually launch the HTTP server. |
 
@@ -91,7 +91,7 @@ error will terminate the process.
 ## Internal Helpers
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `runHTTPServer()` | Calls `http.ListenAndServe(":8080", nil)` and passes any error to `log.Fatal`. The listen address is currently hardcoded and not configurable. |
 
 ---
@@ -101,7 +101,7 @@ error will terminate the process.
 `api_test.go` contains a Ginkgo spec focused on the `RequireToken` middleware:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `should return 401 Unauthorized when token is not provided` | Verifies that a request with no `Authorization` header receives a `401` response. |
 | `should return 401 Unauthorized when token is invalid` | Verifies that a request with an incorrect bearer token receives a `401` response. |
 | `should return 200 OK when token is valid` | Verifies that a request with the correct bearer token is passed through to the wrapped handler and receives a `200` response. |

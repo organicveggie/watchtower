@@ -38,7 +38,7 @@ images).
 **Behaviour by input:**
 
 | Image reference | Resulting URL |
-|---|---|
+| --------------- | ------------- |
 | `"ghcr.io/containrrr/watchtower:mytag"` | `"https://ghcr.io/v2/containrrr/watchtower/manifests/mytag"` |
 | `"containrrr/watchtower:latest"` | `"https://index.docker.io/v2/containrrr/watchtower/manifests/latest"` |
 | `"containrrr/watchtower"` _(no tag)_ | `"https://index.docker.io/v2/containrrr/watchtower/manifests/latest"` |
@@ -54,7 +54,7 @@ test constructs a mock container via `mocks.CreateMockContainerWithImageInfo` wi
 tag, then calls `BuildManifestURL` on it.
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | Fully qualified image | Verifies that `"ghcr.io/containrrr/watchtower:mytag"` produces the correct GHCR manifest URL. |
 | No explicit registry | Verifies that `"containrrr/watchtower:latest"` defaults to `index.docker.io` as the registry host. |
 | No explicit tag | Verifies that `"containrrr/watchtower"` (no tag) defaults to `latest` and resolves to `index.docker.io`. |

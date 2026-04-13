@@ -18,7 +18,7 @@ Shoutrrr.
 Four named templates selectable via `--notification-template`:
 
 | Name | Description |
-|---|---|
+| ---- | ----------- |
 | `default-legacy` | Renders each log entry's message on its own line. Used in legacy (log-entry) mode. |
 | `default` | Renders a summary line (`N Scanned, N Updated, N Failed`) and per-container lines for updated, fresh, skipped, and failed containers. Suppresses the notification entirely if nothing was updated or failed. Falls back to log-entry rendering if no report is available. |
 | `porcelain.v1.summary-no-log` | Machine-readable output used by `--porcelain v1`. One line per container in the format `<name> (<image>): <state>`, with an error suffix for failed/skipped containers. Outputs `"no containers matched filter"` for an empty report. |

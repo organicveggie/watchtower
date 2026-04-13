@@ -16,7 +16,7 @@ Declares three domain constants and one public function.
 **Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `DefaultRegistryDomain` | `"docker.io"` | The canonical domain used in Docker image references when no registry is specified (e.g. `nginx` → `docker.io/library/nginx`). |
 | `DefaultRegistryHost` | `"index.docker.io"` | The actual API hostname for Docker Hub. `GetRegistryAddress` normalises `docker.io` references to this value, since `index.docker.io` is the address that accepts authenticated API requests. |
 | `LegacyDefaultRegistryDomain` | `"index.docker.io"` | An alias for `DefaultRegistryHost`, retained for backward compatibility with older Docker config files that may store credentials under this key. |
@@ -42,7 +42,7 @@ Returns an error if `imageRef` is empty or cannot be parsed as a valid image ref
 **Behaviour by input format:**
 
 | Input | Returned address |
-|---|---|
+| ----- | ---------------- |
 | `"watchtower"` | `"index.docker.io"` |
 | `"containrrr/watchtower"` | `"index.docker.io"` |
 | `"docker.io/containrrr/watchtower"` | `"index.docker.io"` |
@@ -59,7 +59,7 @@ Returns an error if `imageRef` is empty or cannot be parsed as a valid image ref
 `helpers_test.go` bootstraps a Ginkgo suite (`"Helper Suite"`) and covers `GetRegistryAddress` across five cases:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | Empty string | Verifies that an empty input returns an error. |
 | No explicit registry | Verifies that bare image names (`"watchtower"`, `"containrrr/watchtower"`) resolve to `"index.docker.io"`. |
 | `docker.io` domain | Verifies that `docker.io`-prefixed references also resolve to `"index.docker.io"`. |

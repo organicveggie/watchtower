@@ -17,7 +17,7 @@ Implements the complete challenge-response authentication flow in five public fu
 **Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `ChallengeHeader` | `"WWW-Authenticate"` | The HTTP response header name that carries authentication challenge instructions from the registry. |
 
 ---
@@ -104,7 +104,7 @@ without credentials.
 `auth_test.go` bootstraps a Ginkgo suite (`"Registry Auth Suite"`) and covers the following:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `GetToken` (integration) | Calls the real GHCR API with credentials from `CI_INTEGRATION_TEST_REGISTRY_GH_USERNAME` / `CI_INTEGRATION_TEST_REGISTRY_GH_PASSWORD`. Skipped automatically if either variable is empty. Verifies that a non-empty token is returned without error. |
 | `GetAuthURL` — valid challenge | Parses a well-formed bearer challenge string for `ghcr.io` and verifies the resulting URL matches the expected scheme, host, path, and query parameters exactly. |
 | `GetAuthURL` — missing service | Verifies that a challenge string with only `realm` and no `service` returns an error and a nil URL. |

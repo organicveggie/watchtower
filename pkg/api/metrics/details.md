@@ -20,7 +20,7 @@ Defines the `Handler` type and its factory function. The actual metric collectio
 Represents the metrics HTTP endpoint. Fields:
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Path` | `string` | The URL path at which the handler is registered. Always `"/v1/metrics"`. |
 | `Handle` | `http.HandlerFunc` | The Prometheus HTTP handler, sourced from `promhttp.Handler()`. Serves the current state of all registered Prometheus metrics in the standard text exposition format. |
 | `Metrics` | `*metrics.Metrics` | A reference to the shared metrics instance from `pkg/metrics`, obtained via `metrics.Default()`. |
@@ -49,7 +49,7 @@ bearer token authentication before it is reachable by clients.
 `RequireToken` middleware:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `should serve metrics` | Verifies the end-to-end behaviour of the metrics endpoint. Confirms the initial state has `watchtower_containers_updated` at `0`, then registers a scan with known values (`Scanned: 4`, `Updated: 3`, `Failed: 1`) and asserts the response body reflects those values. Also registers three skipped scans (`nil` metrics) and verifies that `watchtower_scans_total` increments to `4` and `watchtower_scans_skipped` increments to `3`. |
 
 The test uses `httptest` to issue requests directly against the handler without starting a real HTTP server, and parses

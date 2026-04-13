@@ -22,7 +22,7 @@ The main builder struct. Holds a seeded random source, a monotonically advancing
 `*report`, a running container count, a slice of generated log entries, and a `staticData` block.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `rand` | `*rand.Rand` | Seeded with `1` for reproducible output. Used by all random-selection helpers. |
 | `lastTime` | `time.Time` | Initialised to 30 minutes before `New()` is called. Advanced by a random 0–29 second step each time `generateTime()` is called. |
 | `report` | `*report` | Lazily initialised on the first call to `addContainer`. |
@@ -74,7 +74,7 @@ Defines the log-entry type and log level constants used when generating syntheti
 #### `logEntry`
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Message` | `string` | The log message text. |
 | `Data` | `map[string]any` | Additional structured fields (always an empty map in generated entries). |
 | `Time` | `time.Time` | The log entry timestamp. |
@@ -85,7 +85,7 @@ Defines the log-entry type and log level constants used when generating syntheti
 A `string` type representing a log severity level.
 
 | Constant | Value |
-|---|---|
+| -------- | ----- |
 | `TraceLevel` | `"trace"` |
 | `DebugLevel` | `"debug"` |
 | `InfoLevel` | `"info"` |
@@ -113,7 +113,7 @@ Returns the level's underlying string value.
 Declares the string pool arrays used by `data.go` when generating random container names, image names, and log messages.
 
 | Variable | Description |
-|---|---|
+| -------- | ----------- |
 | `containerNames []string` | 40 synthetic container names (e.g. `"cyberscribe"`, `"quantumquill"`). Selected round-robin (with numeric suffixes when exhausted) by `generateName`. |
 | `organizationNames []string` | 39 synthetic organisation names (e.g. `"techwave"`, `"codecrafters"`). Used as image name prefixes by `generateImageName`. |
 | `errorMessages []string` | 42 error strings (e.g. `"Error 404: Resource not found"`). Used for `FailedState` containers. |
@@ -134,7 +134,7 @@ Defines the `State` type, the internal `report` struct that implements `types.Re
 A `string` type representing the outcome of a container in a session report.
 
 | Constant | Value | Character in `StatesFromString` |
-|---|---|---|
+| -------- | ----- | ------------------------------- |
 | `ScannedState` | `"scanned"` | `c` |
 | `UpdatedState` | `"updated"` | `u` |
 | `FailedState` | `"failed"` | `e` |
@@ -167,7 +167,7 @@ Defines the `containerStatus` struct, which implements the `types.ContainerRepor
 #### `containerStatus`
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `containerID` | `wt.ContainerID` | Randomly generated hex ID. |
 | `oldImage` | `wt.ImageID` | Randomly generated hex ID representing the current image. |
 | `newImage` | `wt.ImageID` | Randomly generated hex ID representing the latest image. |

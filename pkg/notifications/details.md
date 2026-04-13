@@ -22,7 +22,7 @@ The portion of the template data that is fixed for the lifetime of a notifier in
 from flags and environment.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Title` | `string` | The notification title, composed from the hostname and optional tag prefix. Empty if `--notification-skip-title` is set. |
 | `Host` | `string` | The hostname of the machine running Watchtower. |
 
@@ -34,7 +34,7 @@ The full template data model passed to every notification template at render tim
 per-session fields.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `StaticData` | _(embedded)_ | Static title and host fields. |
 | `Entries` | `[]*log.Entry` | Logrus log entries collected during the session. Used by legacy templates. |
 | `Report` | `t.Report` | The structured session report. Used by report templates. `nil` for legacy template mode. |
@@ -51,7 +51,7 @@ names instead of a raw template string.
 #### `commonTemplates map[string]string`
 
 | Key | Description |
-|---|---|
+| --- | ----------- |
 | `default-legacy` | The default template for legacy (log-entry) mode. Renders each log entry's message on its own line. |
 | `default` | The default template for report mode. Renders a summary line (`N Scanned, N Updated, N Failed`) and per-container lines for updated, fresh, skipped, and failed containers. Only sends a notification if at least one container was updated or failed. Falls back to log-entry rendering if no report is available. |
 | `porcelain.v1.summary-no-log` | The machine-readable template used by `--porcelain v1`. Renders one line per container in the format `<name> (<image>): <state>`, with an error suffix for failed/skipped containers. Outputs `"no containers matched filter"` if the report is empty. |
@@ -66,7 +66,7 @@ Provides the public-facing constructor and helper functions consumed by `cmd/roo
 **Package-level Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `ColorHex` | `"#406170"` | The default notification accent colour as a CSS hex string. Used by MSTeams and Slack notifiers. |
 | `ColorInt` | `0x406170` | The same colour as an integer. Used by the Discord variant of the Slack notifier. |
 
@@ -126,7 +126,7 @@ goroutine, and handles template rendering.
 **Package-level Variables:**
 
 | Variable | Description |
-|---|---|
+| -------- | ----------- |
 | `LocalLog` | A Logrus logger with the field `notify: "no"` set. Used for internal log messages that should not trigger further notifications, avoiding recursive loops. |
 
 ---
@@ -139,7 +139,7 @@ The production implementation of `ty.Notifier` and `logrus.Hook`. Manages a buff
 send goroutine.
 
 | Field | Type | Description |
-|---|---|---|
+| ----- | ---- | ----------- |
 | `Urls` | `[]string` | The Shoutrrr service URLs to send to. |
 | `Router` | `router` | The Shoutrrr sender. Abstracted behind the `router` interface for testability. |
 | `entries` | `[]*log.Entry` | Log entries accumulated during the current notification batch. `nil` outside of a batch (entries are sent immediately when `nil`). |
@@ -226,7 +226,7 @@ the buffer. Otherwise, it is sent immediately via `sendEntries`. Always returns 
 **Internal Helpers in `shoutrrr.go`:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `createNotifier(urls, level, tplString, legacy, data, stdout, delay)` | Parses the template, initialises the Shoutrrr router (directing output to stdout or the trace log level), sets the title param, and returns a fully configured `shoutrrrTypeNotifier`. Logs an error and falls back to the default template if `tplString` is invalid. |
 | `sendNotifications(n)` | The send goroutine. Reads from `n.messages`, sleeps for `n.delay`, sends via `n.Router`, and logs per-service errors using `LocalLog`. Signals `n.done` when the channel is closed. |
 | `buildMessage(data)` | Executes the parsed template against `data` (or `data.Entries` for legacy mode) and returns the rendered string. |
@@ -245,7 +245,7 @@ Legacy email notifier adapter. Converts `--notification-email-*` flags into a Sh
 **Internal Functions:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `newEmailNotifier(c)` | Reads all `--notification-email-*` flags and returns a configured `emailTypeNotifier`. |
 | `(e) GetURL(c)` | Builds a `shoutrrr/smtp.Config` from the stored parameters, enabling `STARTTLS` unless `tlsSkipVerify` is set, and returns the Shoutrrr URL string. |
 | `(e) GetDelay()` | Returns `e.delay`, satisfying `ty.DelayNotifier`. The delay is read from `--notification-email-delay`. |
@@ -262,7 +262,7 @@ URL.
 **Internal Functions:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `newSlackNotifier(c)` | Reads all `--notification-slack-*` flags and returns a configured `slackTypeNotifier`. |
 | `(s) GetURL(c)` | Inspects the hook URL. If it points to `discord.com` or `discordapp.com`, produces a Shoutrrr Discord URL. Otherwise strips the Slack webhook prefix, builds a `shoutrrr/slack.Config` with the username, colour, and icon, and returns the Shoutrrr URL string. |
 
@@ -277,7 +277,7 @@ Legacy Microsoft Teams notifier adapter. Converts `--notification-msteams-hook` 
 **Internal Functions:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `newMsTeamsNotifier(cmd)` | Reads `--notification-msteams-hook` and `--notification-msteams-data` flags. Calls `log.Fatal` if the hook URL is empty. |
 | `(n) GetURL(c)` | Parses the raw webhook URL, calls `shoutrrrTeams.ConfigFromWebhookURL` to extract the token components, sets `ColorHex`, and returns the Shoutrrr Teams URL string. |
 
@@ -292,7 +292,7 @@ Legacy Gotify notifier adapter. Converts `--notification-gotify-*` flags into a 
 **Internal Functions:**
 
 | Function | Description |
-|---|---|
+| -------- | ----------- |
 | `newGotifyNotifier(c)` | Reads all `--notification-gotify-*` flags via `getGotifyURL` and `getGotifyToken`. |
 | `getGotifyURL(flags)` | Validates that the URL is non-empty and has an `http://` or `https://` scheme. Warns if using plain HTTP. |
 | `getGotifyToken(flags)` | Validates that the token is non-empty. |
@@ -303,7 +303,7 @@ Legacy Gotify notifier adapter. Converts `--notification-gotify-*` flags into a 
 ## Test Coverage
 
 | File | Description |
-|---|---|
+| ---- | ----------- |
 | `notifications_suite_test.go` | Bootstraps the Ginkgo test suite for the `notifications_test` package. Sets `CharactersAroundMismatchToInclude` to 20 for more context in diff output. |
 | `shoutrrr_test.go` | Internal package tests (`package notifications`) covering `getShoutrrrTemplate` (named template lookup, invalid template fallback), `AddLogHook` (idempotency), legacy template rendering (`default-legacy`, custom templates, `ToUpper`/`ToLower`/`Title` functions, invalid template fallback), report template rendering (`default`, all container states, empty report, `porcelain.v1.summary-no-log`), `Title` and `Host` template fields, notification batching (empty batch suppression, non-empty batch delivery), title param omission when `Title` is empty, and blocking router behaviour (slow send not lost, send completes after unblock). |
 | `notifier_test.go` | External package tests (`package notifications_test`) covering `NewNotifier` (empty shoutrrr type produces no names), `GetTemplateData` (custom hostname, no resolvable hostname, title tag, legacy email subject tag, skip-title flag), legacy URL conversion for each service type (email full config, email default fields, Slack with URL/username/channel/icon emoji, Gotify, MSTeams), and notification delay resolution (no delay, legacy delay, flag delay). |

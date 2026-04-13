@@ -121,7 +121,7 @@ constraints are active, or `"Only checking containers ..."` with a summary of th
 `pkg/container/mocks`:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `TestWatchtowerContainersFilter` | Verifies that `WatchtowerContainersFilter` returns `true` for a container where `IsWatchtower()` returns `true`. |
 | `TestNoFilter` | Verifies that `NoFilter` always returns `true`. |
 | `TestFilterByNames` | Verifies that `FilterByNames` returns `baseFilter` unchanged for an empty name list, passes a container whose name matches, and rejects a container whose name does not match. |

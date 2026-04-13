@@ -17,7 +17,7 @@ and digest comparison.
 **Constants:**
 
 | Constant | Value | Description |
-|---|---|---|
+| -------- | ----- | ----------- |
 | `ContentDigestHeader` | `"Docker-Content-Digest"` | The HTTP response header returned by the registry containing the manifest digest. Read by `GetDigest` to extract the remote digest value. |
 
 ---
@@ -88,7 +88,7 @@ includes both the HTTP status and the `WWW-Authenticate` header (if present) to 
 `digest_test.go` bootstraps a Ginkgo suite (`"Digest Suite"`) and covers the following:
 
 | Test | Description |
-|---|---|
+| ---- | ----------- |
 | `CompareDigest` — digests match (integration) | Calls the real GHCR API using credentials from `CI_INTEGRATION_TEST_REGISTRY_GH_USERNAME` / `CI_INTEGRATION_TEST_REGISTRY_GH_PASSWORD`. Skipped automatically if either is empty. Verifies that `true` is returned when the container's local digest matches the remote. |
 | `CompareDigest` — digests differ | Placeholder test (no implementation body). |
 | `CompareDigest` — registry unavailable | Placeholder test (no implementation body). |

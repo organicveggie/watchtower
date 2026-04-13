@@ -13,3 +13,5 @@ docs/assets/wasm_exec.js
 docs/assets/*.wasm
 
 *.code-workspace
+
+npm-debug.log

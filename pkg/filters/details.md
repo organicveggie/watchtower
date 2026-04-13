@@ -1,6 +1,9 @@
 # `pkg/filters` Package
 
-This package provides all container filtering logic used by Watchtower to determine which containers should be monitored and updated. Filters are composable functions that each accept a `types.FilterableContainer` and return a boolean, and are chained together to form a combined filter that a container must fully satisfy to be included in a session. The package is consumed by `cmd/root.go`, `internal/actions/check.go`, and `pkg/container/client.go`.
+This package provides all container filtering logic used by Watchtower to determine which containers should be monitored
+and updated. Filters are composable functions that each accept a `types.FilterableContainer` and return a boolean, and
+are chained together to form a combined filter that a container must fully satisfy to be included in a session. The
+package is consumed by `cmd/root.go`, `internal/actions/check.go`, and `pkg/container/client.go`.
 
 ---
 
@@ -8,9 +11,12 @@ This package provides all container filtering logic used by Watchtower to determ
 
 ### `filters.go`
 
-Defines a set of filter constructor functions and the `BuildFilter` convenience function that composes them into a single `types.Filter` for use in an update session.
+Defines a set of filter constructor functions and the `BuildFilter` convenience function that composes them into a
+single `types.Filter` for use in an update session.
 
-All filter functions follow the same pattern: they accept a `baseFilter types.Filter` and return a new `types.Filter` that first applies its own logic and, if the container passes, delegates to `baseFilter`. This allows filters to be stacked without either function needing knowledge of the other.
+All filter functions follow the same pattern: they accept a `baseFilter types.Filter` and return a new `types.Filter`
+that first applies its own logic and, if the container passes, delegates to `baseFilter`. This allows filters to be
+stacked without either function needing knowledge of the other.
 
 ---
 
@@ -20,24 +26,30 @@ All filter functions follow the same pattern: they accept a `baseFilter types.Fi
 
 #### `WatchtowerContainersFilter(c types.FilterableContainer) bool`
 
-A pre-built filter (not a constructor) that returns `true` only for containers identified as Watchtower instances via `c.IsWatchtower()`. Used directly by `internal/actions/check.go` when searching for other running Watchtower containers to clean up.
+A pre-built filter (not a constructor) that returns `true` only for containers identified as Watchtower instances via
+`c.IsWatchtower()`. Used directly by `internal/actions/check.go` when searching for other running Watchtower containers
+to clean up.
 
 ---
 
 #### `NoFilter(types.FilterableContainer) bool`
 
-A pre-built pass-through filter that always returns `true`. Used as the base filter when no other constraints apply, and as the starting point when composing filter chains via `BuildFilter`.
+A pre-built pass-through filter that always returns `true`. Used as the base filter when no other constraints apply, and
+as the starting point when composing filter chains via `BuildFilter`.
 
 ---
 
 #### `FilterByNames(names []string, baseFilter types.Filter) types.Filter`
 
-Returns a filter that passes only containers whose name matches at least one entry in `names`. If `names` is empty, returns `baseFilter` unchanged.
+Returns a filter that passes only containers whose name matches at least one entry in `names`. If `names` is empty,
+returns `baseFilter` unchanged.
 
 Name matching supports two modes for each entry:
 
-- **Exact match**: The entry is compared directly against `c.Name()` and `c.Name()[1:]` (stripping the leading `/` that Docker prepends to container names).
-- **Regex match**: If the entry compiles as a regular expression, it is tested against the full container name. The match must span the entire name (start index ≤ 1 and end index ≥ `len(name)-1`) to avoid partial substring matches.
+- **Exact match**: The entry is compared directly against `c.Name()` and `c.Name()[1:]` (stripping the leading `/` that
+  Docker prepends to container names).
+- **Regex match**: If the entry compiles as a regular expression, it is tested against the full container name. The
+  match must span the entire name (start index ≤ 1 and end index ≥ `len(name)-1`) to avoid partial substring matches.
 
 If a container passes the name check, `baseFilter` is called and its result is returned.
 
@@ -45,37 +57,51 @@ If a container passes the name check, `baseFilter` is called and its result is r
 
 #### `FilterByDisableNames(disableNames []string, baseFilter types.Filter) types.Filter`
 
-Returns a filter that excludes containers whose name exactly matches any entry in `disableNames`. If `disableNames` is empty, returns `baseFilter` unchanged. Matching uses the same exact-match logic as `FilterByNames` (both with and without the leading `/`). Containers that do not match any disabled name are passed to `baseFilter`.
+Returns a filter that excludes containers whose name exactly matches any entry in `disableNames`. If `disableNames` is
+empty, returns `baseFilter` unchanged. Matching uses the same exact-match logic as `FilterByNames` (both with and
+without the leading `/`). Containers that do not match any disabled name are passed to `baseFilter`.
 
 ---
 
 #### `FilterByEnableLabel(baseFilter types.Filter) types.Filter`
 
-Returns a filter that passes only containers for which the `com.centurylinklabs.watchtower.enable` label is present (regardless of its value). Containers where the label is absent (`ok == false` from `c.Enabled()`) are excluded. Used when `--label-enable` is set, to restrict monitoring to explicitly opted-in containers.
+Returns a filter that passes only containers for which the `com.centurylinklabs.watchtower.enable` label is present
+(regardless of its value). Containers where the label is absent (`ok == false` from `c.Enabled()`) are excluded. Used
+when `--label-enable` is set, to restrict monitoring to explicitly opted-in containers.
 
 ---
 
 #### `FilterByDisabledLabel(baseFilter types.Filter) types.Filter`
 
-Returns a filter that excludes containers where the `com.centurylinklabs.watchtower.enable` label is explicitly set to `false`. Containers where the label is absent or set to `true` are passed through to `baseFilter`. Applied unconditionally by `BuildFilter` as the final stage in every filter chain, providing a universal opt-out mechanism via label.
+Returns a filter that excludes containers where the `com.centurylinklabs.watchtower.enable` label is explicitly set to
+`false`. Containers where the label is absent or set to `true` are passed through to `baseFilter`. Applied
+unconditionally by `BuildFilter` as the final stage in every filter chain, providing a universal opt-out mechanism via
+label.
 
 ---
 
 #### `FilterByScope(scope string, baseFilter types.Filter) types.Filter`
 
-Returns a filter that passes only containers whose scope matches the given `scope` string. A container with no scope label, or with an empty scope value, is treated as having the scope `"none"`. A container passes if its effective scope equals `scope`. Used to implement multi-instance Watchtower deployments where each instance manages a distinct subset of containers.
+Returns a filter that passes only containers whose scope matches the given `scope` string. A container with no scope
+label, or with an empty scope value, is treated as having the scope `"none"`. A container passes if its effective scope
+equals `scope`. Used to implement multi-instance Watchtower deployments where each instance manages a distinct subset of
+containers.
 
 ---
 
 #### `FilterByImage(images []string, baseFilter types.Filter) types.Filter`
 
-Returns a filter that passes only containers whose image name (stripped of its tag) matches at least one entry in `images`. If `images` is `nil`, returns `baseFilter` unchanged. Used by the HTTP API update handler to restrict an on-demand update to specific images.
+Returns a filter that passes only containers whose image name (stripped of its tag) matches at least one entry in
+`images`. If `images` is `nil`, returns `baseFilter` unchanged. Used by the HTTP API update handler to restrict an
+on-demand update to specific images.
 
 ---
 
 #### `BuildFilter(names []string, disableNames []string, enableLabel bool, scope string) (types.Filter, string)`
 
-Composes a complete filter from the supplied parameters and returns both the combined `types.Filter` and a human-readable description string suitable for logging at startup. The filter chain is constructed in the following order:
+Composes a complete filter from the supplied parameters and returns both the combined `types.Filter` and a
+human-readable description string suitable for logging at startup. The filter chain is constructed in the following
+order:
 
 1. `NoFilter` as the base.
 2. `FilterByNames` — if `names` is non-empty.
@@ -84,13 +110,15 @@ Composes a complete filter from the supplied parameters and returns both the com
 5. `FilterByScope` — if `scope` is `"none"` or any non-empty value.
 6. `FilterByDisabledLabel` — always applied as the final stage.
 
-The description string begins with `"Checking all containers (except explicitly disabled with label)"` when no constraints are active, or `"Only checking containers ..."` with a summary of the active constraints when any are set.
+The description string begins with `"Checking all containers (except explicitly disabled with label)"` when no
+constraints are active, or `"Only checking containers ..."` with a summary of the active constraints when any are set.
 
 ---
 
 ## Test Coverage
 
-`filters_test.go` tests each filter function independently using the `FilterableContainer` mock from `pkg/container/mocks`:
+`filters_test.go` tests each filter function independently using the `FilterableContainer` mock from
+`pkg/container/mocks`:
 
 | Test | Description |
 |---|---|

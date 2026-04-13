@@ -1,6 +1,9 @@
 # `pkg/registry/manifest` Package
 
-This package provides a single function for constructing the Docker Registry V2 manifest endpoint URL for a given container's image. The resulting URL is used by `pkg/registry/digest` when making HEAD requests to check whether a container's image is stale. It is the canonical place where image name, tag, and registry host are combined into a well-formed registry API URL.
+This package provides a single function for constructing the Docker Registry V2 manifest endpoint URL for a given
+container's image. The resulting URL is used by `pkg/registry/digest` when making HEAD requests to check whether a
+container's image is stale. It is the canonical place where image name, tag, and registry host are combined into a
+well-formed registry API URL.
 
 ---
 
@@ -16,15 +19,21 @@ Contains a single public function.
 
 #### `BuildManifestURL(container types.Container) (string, error)`
 
-Constructs and returns the HTTPS URL of the Docker Registry V2 manifest endpoint for the container's image. The full sequence is:
+Constructs and returns the HTTPS URL of the Docker Registry V2 manifest endpoint for the container's image. The full
+sequence is:
 
-1. Parses `container.ImageName()` using `ref.ParseDockerRef`, which normalises the image reference and appends `:latest` if no tag is specified.
-2. Asserts that the normalised reference implements `ref.NamedTagged`. Returns an error if the reference has no tag — this prevents requests for digest-pinned images (e.g. `image@sha256:...`), which have no manifest tag to look up.
-3. Calls `helpers.GetRegistryAddress` on the tagged reference's name to resolve the registry host (e.g. `docker.io` → `index.docker.io`).
-4. Extracts the image path via `ref.Path` (which correctly handles the `library/` prefix for Docker Hub official images) and the tag via `normalizedTaggedRef.Tag()`.
+1. Parses `container.ImageName()` using `ref.ParseDockerRef`, which normalises the image reference and appends `:latest`
+   if no tag is specified.
+2. Asserts that the normalised reference implements `ref.NamedTagged`. Returns an error if the reference has no tag —
+   this prevents requests for digest-pinned images (e.g. `image@sha256:...`), which have no manifest tag to look up.
+3. Calls `helpers.GetRegistryAddress` on the tagged reference's name to resolve the registry host (e.g. `docker.io` →
+   `index.docker.io`).
+4. Extracts the image path via `ref.Path` (which correctly handles the `library/` prefix for Docker Hub official images)
+   and the tag via `normalizedTaggedRef.Tag()`.
 5. Constructs and returns an `https` URL of the form `https://<host>/v2/<image>/manifests/<tag>`.
 
-Returns an error if the image reference cannot be parsed or if the reference has no tag (including digest-pinned images).
+Returns an error if the image reference cannot be parsed or if the reference has no tag (including digest-pinned
+images).
 
 **Behaviour by input:**
 
@@ -40,7 +49,9 @@ Returns an error if the image reference cannot be parsed or if the reference has
 
 ## Test Coverage
 
-`manifest_test.go` bootstraps a Ginkgo suite (`"Manifest Suite"`) and covers `BuildManifestURL` across five cases. Each test constructs a mock container via `mocks.CreateMockContainerWithImageInfo` with the image reference set as a repo tag, then calls `BuildManifestURL` on it.
+`manifest_test.go` bootstraps a Ginkgo suite (`"Manifest Suite"`) and covers `BuildManifestURL` across five cases. Each
+test constructs a mock container via `mocks.CreateMockContainerWithImageInfo` with the image reference set as a repo
+tag, then calls `BuildManifestURL` on it.
 
 | Test | Description |
 |---|---|

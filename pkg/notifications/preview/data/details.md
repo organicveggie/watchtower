@@ -1,6 +1,9 @@
 # `pkg/notifications/preview/data` Package
 
-This package generates synthetic data for rendering notification template previews. It has no runtime role — its sole purpose is to produce realistic-looking session state (container report entries, log entries, and associated metadata) so that users and tests can validate custom `--notification-template` values without running a real update cycle. It is consumed by `pkg/notifications/preview`.
+This package generates synthetic data for rendering notification template previews. It has no runtime role — its sole
+purpose is to produce realistic-looking session state (container report entries, log entries, and associated metadata)
+so that users and tests can validate custom `--notification-template` values without running a real update cycle. It is
+consumed by `pkg/notifications/preview`.
 
 ---
 
@@ -8,13 +11,15 @@ This package generates synthetic data for rendering notification template previe
 
 ### `data.go`
 
-Defines the central `previewData` builder and its `staticData` helper. All synthetic data flows through a `previewData` instance.
+Defines the central `previewData` builder and its `staticData` helper. All synthetic data flows through a `previewData`
+instance.
 
 **Types:**
 
 #### `previewData`
 
-The main builder struct. Holds a seeded random source, a monotonically advancing timestamp, a lazily-initialised `*report`, a running container count, a slice of generated log entries, and a `staticData` block.
+The main builder struct. Holds a seeded random source, a monotonically advancing timestamp, a lazily-initialised
+`*report`, a running container count, a slice of generated log entries, and a `staticData` block.
 
 | Field | Type | Description |
 |---|---|---|
@@ -35,7 +40,8 @@ Plain struct with `Title string` and `Host string`.
 
 #### `New() *previewData`
 
-Returns a freshly initialised `previewData` with the random source seeded to `1`, `lastTime` set to 30 minutes in the past, empty `Entries`, and `StaticData` set to `{Title: "Title", Host: "Host"}`.
+Returns a freshly initialised `previewData` with the random source seeded to `1`, `lastTime` set to 30 minutes in the
+past, empty `Entries`, and `StaticData` set to `{Title: "Title", Host: "Host"}`.
 
 ---
 
@@ -43,11 +49,15 @@ Returns a freshly initialised `previewData` with the random source seeded to `1`
 
 #### `(pb *previewData) AddFromState(state State)`
 
-Generates a synthetic container entry and appends it to the internal report. Produces random hex container and image IDs, selects a container name from the pool (cycling with a numeric suffix once exhausted), and derives an image name from the organisation name pool. For `FailedState` and `SkippedState`, a random error message is selected from the corresponding pool and stored as the container's error. Delegates to `addContainer`.
+Generates a synthetic container entry and appends it to the internal report. Produces random hex container and image
+IDs, selects a container name from the pool (cycling with a numeric suffix once exhausted), and derives an image name
+from the organisation name pool. For `FailedState` and `SkippedState`, a random error message is selected from the
+corresponding pool and stored as the container's error. Delegates to `addContainer`.
 
 #### `(pb *previewData) AddLogEntry(level LogLevel)`
 
-Appends a `logEntry` to `Entries`. Selects a message from `logErrors` for `FatalLevel`, `ErrorLevel`, and `WarnLevel`; selects from `logMessages` for all other levels. The entry's timestamp advances monotonically via `generateTime`.
+Appends a `logEntry` to `Entries`. Selects a message from `logErrors` for `FatalLevel`, `ErrorLevel`, and `WarnLevel`;
+selects from `logMessages` for all other levels. The entry's timestamp advances monotonically via `generateTime`.
 
 #### `(pb *previewData) Report() types.Report`
 
@@ -88,7 +98,9 @@ A `string` type representing a log severity level.
 
 #### `LevelsFromString(str string) []LogLevel`
 
-Parses a compact string of level characters and returns the corresponding `LogLevel` slice. Character mapping: `p` → Panic, `f` → Fatal, `e` → Error, `w` → Warn, `i` → Info, `d` → Debug, `t` → Trace. Unrecognised characters are silently skipped.
+Parses a compact string of level characters and returns the corresponding `LogLevel` slice. Character mapping: `p` →
+Panic, `f` → Fatal, `e` → Error, `w` → Warn, `i` → Info, `d` → Debug, `t` → Trace. Unrecognised characters are silently
+skipped.
 
 #### `(level LogLevel) String() string`
 
@@ -132,13 +144,17 @@ A `string` type representing the outcome of a container in a session report.
 
 #### `report`
 
-Package-private struct implementing `types.Report`. Holds six slices of `types.ContainerReport`, one per state. Implements `Scanned()`, `Updated()`, `Failed()`, `Skipped()`, `Stale()`, `Fresh()`, and `All()`. `All()` merges all six slices, deduplicates by container ID (keeping the first occurrence in the order: updated → failed → skipped → stale → fresh → scanned), and sorts the result by container ID.
+Package-private struct implementing `types.Report`. Holds six slices of `types.ContainerReport`, one per state.
+Implements `Scanned()`, `Updated()`, `Failed()`, `Skipped()`, `Stale()`, `Fresh()`, and `All()`. `All()` merges all six
+slices, deduplicates by container ID (keeping the first occurrence in the order: updated → failed → skipped → stale →
+fresh → scanned), and sorts the result by container ID.
 
 **Public Functions:**
 
 #### `StatesFromString(str string) []State`
 
-Parses a compact string of state characters and returns the corresponding `State` slice. Uses the character mapping in the table above. Unrecognised characters are silently skipped.
+Parses a compact string of state characters and returns the corresponding `State` slice. Uses the character mapping in
+the table above. Unrecognised characters are silently skipped.
 
 ---
 
@@ -160,10 +176,12 @@ Defines the `containerStatus` struct, which implements the `types.ContainerRepor
 | `error` | `error` | Non-nil for `FailedState` and `SkippedState` entries; `nil` otherwise. |
 | `state` | `State` | The container's outcome state. |
 
-Implements `types.ContainerReport` via methods: `ID()`, `Name()`, `CurrentImageID()`, `LatestImageID()`, `ImageName()`, `Error()` (returns `""` when `error` is nil), and `State()`.
+Implements `types.ContainerReport` via methods: `ID()`, `Name()`, `CurrentImageID()`, `LatestImageID()`, `ImageName()`,
+`Error()` (returns `""` when `error` is nil), and `State()`.
 
 ---
 
 ## Test Coverage
 
-This package has no dedicated test file. Its types and functions are exercised through `pkg/notifications/preview` tests.
+This package has no dedicated test file. Its types and functions are exercised through `pkg/notifications/preview`
+tests.

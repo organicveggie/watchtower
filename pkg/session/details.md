@@ -1,6 +1,10 @@
 # `pkg/session` Package
 
-This package models the state of a single Watchtower update session. It defines the container state enum, a per-container status type that implements `types.ContainerReport`, a mutable `Progress` map that accumulates container statuses as an update cycle runs, and the `report` type that converts a completed `Progress` into an immutable `types.Report` for consumption by the notification and metrics systems. It is consumed by `internal/actions/update.go`, `pkg/metrics`, `pkg/notifications`, and `internal/actions/mocks`.
+This package models the state of a single Watchtower update session. It defines the container state enum, a
+per-container status type that implements `types.ContainerReport`, a mutable `Progress` map that accumulates container
+statuses as an update cycle runs, and the `report` type that converts a completed `Progress` into an immutable
+`types.Report` for consumption by the notification and metrics systems. It is consumed by `internal/actions/update.go`,
+`pkg/metrics`, `pkg/notifications`, and `internal/actions/mocks`.
 
 ---
 
@@ -30,7 +34,8 @@ An integer enum representing the lifecycle state of a container within a session
 
 #### `ContainerStatus`
 
-Holds the per-container state captured during a session and implements `types.ContainerReport`. All fields are unexported; values are set by `UpdateFromContainer` and mutated by `Progress` methods.
+Holds the per-container state captured during a session and implements `types.ContainerReport`. All fields are
+unexported; values are set by `UpdateFromContainer` and mutated by `Progress` methods.
 
 | Field | Type | Description |
 |---|---|---|
@@ -58,13 +63,15 @@ Holds the per-container state captured during a session and implements `types.Co
 
 ### `progress.go`
 
-Defines the mutable `Progress` map used to accumulate container statuses as an update cycle runs, and provides the constructor function for creating `ContainerStatus` values.
+Defines the mutable `Progress` map used to accumulate container statuses as an update cycle runs, and provides the
+constructor function for creating `ContainerStatus` values.
 
 **Types:**
 
 #### `Progress`
 
-A `map[types.ContainerID]*ContainerStatus`. Used as the primary accumulator throughout `internal/actions/update.go`. Converted to an immutable `types.Report` at the end of a session via `Report()`.
+A `map[types.ContainerID]*ContainerStatus`. Used as the primary accumulator throughout `internal/actions/update.go`.
+Converted to an immutable `types.Report` at the end of a session via `Report()`.
 
 **Public Functions and Methods:**
 
@@ -72,49 +79,60 @@ A `map[types.ContainerID]*ContainerStatus`. Used as the primary accumulator thro
 
 #### `UpdateFromContainer(cont types.Container, newImage types.ImageID, state State) *ContainerStatus`
 
-Constructs and returns a new `ContainerStatus` populated from the fields of `cont`. Sets `oldImage` from `cont.SafeImageID()` (which returns an empty ID rather than panicking if image info is unavailable) and `newImage` from the provided argument. Used internally by `AddSkipped` and `AddScanned`.
+Constructs and returns a new `ContainerStatus` populated from the fields of `cont`. Sets `oldImage` from
+`cont.SafeImageID()` (which returns an empty ID rather than panicking if image info is unavailable) and `newImage` from
+the provided argument. Used internally by `AddSkipped` and `AddScanned`.
 
 ---
 
 #### `(m Progress) AddSkipped(cont types.Container, err error)`
 
-Adds a container to the progress map with `SkippedState` and the provided error. The `newImage` is set to the container's current image ID (i.e. no new image was found). Used when a container is explicitly excluded from the update cycle.
+Adds a container to the progress map with `SkippedState` and the provided error. The `newImage` is set to the
+container's current image ID (i.e. no new image was found). Used when a container is explicitly excluded from the update
+cycle.
 
 ---
 
 #### `(m Progress) AddScanned(cont types.Container, newImage types.ImageID)`
 
-Adds a container to the progress map with `ScannedState` and the provided newest image ID. The final state (Fresh, Updated, Failed, or Stale) is determined later by `NewReport` or by calling `MarkForUpdate` / `UpdateFailed`.
+Adds a container to the progress map with `ScannedState` and the provided newest image ID. The final state (Fresh,
+Updated, Failed, or Stale) is determined later by `NewReport` or by calling `MarkForUpdate` / `UpdateFailed`.
 
 ---
 
 #### `(m Progress) UpdateFailed(failures map[types.ContainerID]error)`
 
-Iterates over the `failures` map and, for each container ID, sets its state to `FailedState` and records the associated error. Called after a batch of stop/restart operations to record which containers could not be updated.
+Iterates over the `failures` map and, for each container ID, sets its state to `FailedState` and records the associated
+error. Called after a batch of stop/restart operations to record which containers could not be updated.
 
 ---
 
 #### `(m Progress) Add(update *ContainerStatus)`
 
-Inserts a `ContainerStatus` into the map using `update.containerID` as the key. Used directly by `AddSkipped` and `AddScanned`; also available for callers that construct a `ContainerStatus` manually.
+Inserts a `ContainerStatus` into the map using `update.containerID` as the key. Used directly by `AddSkipped` and
+`AddScanned`; also available for callers that construct a `ContainerStatus` manually.
 
 ---
 
 #### `(m Progress) MarkForUpdate(containerID types.ContainerID)`
 
-Sets the state of the container identified by `containerID` to `UpdatedState`. Called after a container has been successfully stopped and restarted with a new image.
+Sets the state of the container identified by `containerID` to `UpdatedState`. Called after a container has been
+successfully stopped and restarted with a new image.
 
 ---
 
 #### `(m Progress) Report() types.Report`
 
-Converts the completed `Progress` map into an immutable `types.Report` by delegating to `NewReport`. This is the terminal operation of the session accumulation lifecycle.
+Converts the completed `Progress` map into an immutable `types.Report` by delegating to `NewReport`. This is the
+terminal operation of the session accumulation lifecycle.
 
 ---
 
 ### `report.go`
 
-Implements `types.Report` via the unexported `report` struct, provides the `NewReport` constructor that classifies containers from a `Progress` into their final result buckets, and defines the `sortableContainers` helper used to sort all report slices by container ID.
+Implements `types.Report` via the unexported `report` struct, provides the `NewReport` constructor that classifies
+containers from a `Progress` into their final result buckets, and defines the `sortableContainers` helper used to sort
+all report slices by container ID.
 
 **Public Functions:**
 
@@ -122,14 +140,16 @@ Implements `types.Report` via the unexported `report` struct, provides the `NewR
 
 #### `NewReport(progress Progress) types.Report`
 
-Constructs an immutable `types.Report` from a completed `Progress` map by classifying each `ContainerStatus` into its final result bucket. The classification logic is:
+Constructs an immutable `types.Report` from a completed `Progress` map by classifying each `ContainerStatus` into its
+final result bucket. The classification logic is:
 
 - **`SkippedState`** — placed directly into `skipped`. Not added to `scanned`.
 - **All others** — added to `scanned` first, then further classified:
   - If `newImage == oldImage`: state is overridden to `FreshState` and the container is added to `fresh`.
   - If `UpdatedState`: added to `updated`.
   - If `FailedState`: added to `failed`.
-  - **Default** (e.g. `ScannedState` with a new image but no update or failure): state is overridden to `StaleState` and the container is added to `stale`.
+  - **Default** (e.g. `ScannedState` with a new image but no update or failure): state is overridden to `StaleState` and
+    the container is added to `stale`.
 
 All six result slices are sorted by container ID (lexicographic on `types.ContainerID`) before the report is returned.
 
@@ -153,7 +173,8 @@ All six result slices are sorted by container ID (lexicographic on `types.Contai
 
 #### `sortableContainers`
 
-A `[]types.ContainerReport` type alias that implements `sort.Interface` by comparing `ID()` values lexicographically. Used to sort all six result slices in `NewReport` and the combined slice in `All()`.
+A `[]types.ContainerReport` type alias that implements `sort.Interface` by comparing `ID()` values lexicographically.
+Used to sort all six result slices in `NewReport` and the combined slice in `All()`.
 
 ---
 
@@ -161,6 +182,10 @@ A `[]types.ContainerReport` type alias that implements `sort.Interface` by compa
 
 This package has no dedicated test file. Its behaviour is exercised through:
 
-- `internal/actions/mocks/progress.go` — `CreateMockProgressReport` constructs `Progress` instances covering all states (`SkippedState`, `FreshState`, `UpdatedState`, `FailedState`) and calls `Progress.Report()`, exercising the full `NewReport` classification path.
-- `internal/actions/update_test.go` — verifies the end-to-end integration between the update engine and the report produced at the end of a session.
-- `pkg/notifications/shoutrrr_test.go` — renders notification templates against mock reports, exercising the `types.Report` interface methods on `report`.
+- `internal/actions/mocks/progress.go` — `CreateMockProgressReport` constructs `Progress` instances covering all states
+  (`SkippedState`, `FreshState`, `UpdatedState`, `FailedState`) and calls `Progress.Report()`, exercising the full
+  `NewReport` classification path.
+- `internal/actions/update_test.go` — verifies the end-to-end integration between the update engine and the report
+  produced at the end of a session.
+- `pkg/notifications/shoutrrr_test.go` — renders notification templates against mock reports, exercising the
+  `types.Report` interface methods on `report`.

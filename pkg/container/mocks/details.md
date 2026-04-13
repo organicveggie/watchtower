@@ -1,6 +1,9 @@
 # `pkg/container/mocks` Package
 
-This package is a test support library. It provides mock implementations of container-related interfaces, a mock HTTP API server that simulates the Docker daemon, reference types for describing containers in tests, and a directory of JSON fixture files that represent real Docker API responses. It has no production use and is imported exclusively by test files in `pkg/container`, `pkg/filters`, `pkg/registry`, and `internal/actions`.
+This package is a test support library. It provides mock implementations of container-related interfaces, a mock HTTP
+API server that simulates the Docker daemon, reference types for describing containers in tests, and a directory of JSON
+fixture files that represent real Docker API responses. It has no production use and is imported exclusively by test
+files in `pkg/container`, `pkg/filters`, `pkg/registry`, and `internal/actions`.
 
 ---
 
@@ -8,9 +11,12 @@ This package is a test support library. It provides mock implementations of cont
 
 ### `ApiServer.go`
 
-Provides a collection of `http.HandlerFunc` constructors that simulate specific Docker API endpoints using [`gomega/ghttp`](https://pkg.go.dev/github.com/onsi/gomega/ghttp). Tests compose these handlers onto a `ghttp.Server` to create a mock Docker daemon without needing a real Docker installation.
+Provides a collection of `http.HandlerFunc` constructors that simulate specific Docker API endpoints using
+[`gomega/ghttp`](https://pkg.go.dev/github.com/onsi/gomega/ghttp). Tests compose these handlers onto a `ghttp.Server` to
+create a mock Docker daemon without needing a real Docker installation.
 
-Also declares the canonical set of named `ContainerRef` variables representing the containers available in the fixture data, and defines the image references they depend on.
+Also declares the canonical set of named `ContainerRef` variables representing the containers available in the fixture
+data, and defines the image references they depend on.
 
 ---
 
@@ -36,15 +42,19 @@ Also declares the canonical set of named `ContainerRef` variables representing t
 
 #### `RespondWithJSONFile(relPath string, statusCode int, optionalHeader ...http.Header) http.HandlerFunc`
 
-Returns a `ghttp` response handler that reads the JSON file at `relPath` and responds with it at the given HTTP status code. Calls `gomega.ExpectWithOffset` to fail the test immediately if the file cannot be read. An optional set of response headers may be supplied.
+Returns a `ghttp` response handler that reads the JSON file at `relPath` and responds with it at the given HTTP status
+code. Calls `gomega.ExpectWithOffset` to fail the test immediately if the file cannot be read. An optional set of
+response headers may be supplied.
 
 ---
 
 #### `GetContainerHandlers(containerRefs ...*ContainerRef) []http.HandlerFunc`
 
-Accepts one or more `ContainerRef` values and returns a slice of `http.HandlerFunc` values suitable for appending to a `ghttp.Server`. For each ref it produces:
+Accepts one or more `ContainerRef` values and returns a slice of `http.HandlerFunc` values suitable for appending to a
+`ghttp.Server`. For each ref it produces:
 
-1. A handler for `GET /containers/{id}/json` that responds with the container's fixture JSON (or a 404 if `isMissing` is set).
+1. A handler for `GET /containers/{id}/json` that responds with the container's fixture JSON (or a 404 if `isMissing` is
+   set).
 2. Handlers for any containers that the ref directly references (e.g. a network supplier), one level deep.
 3. A handler for `GET /images/{imageID}/json` that responds with the image fixture JSON.
 
@@ -54,37 +64,45 @@ This is the primary entry point for setting up a mock Docker daemon in container
 
 #### `GetContainerHandler(containerID string, containerInfo *types.ContainerJSON) http.HandlerFunc`
 
-Returns a handler for the `GET /containers/{id}/json` endpoint. If `containerInfo` is non-nil, responds with it as JSON at HTTP 200. If `containerInfo` is nil, responds with a 404 not-found response.
+Returns a handler for the `GET /containers/{id}/json` endpoint. If `containerInfo` is non-nil, responds with it as JSON
+at HTTP 200. If `containerInfo` is nil, responds with a 404 not-found response.
 
 ---
 
 #### `GetImageHandler(imageInfo *types.ImageInspect) http.HandlerFunc`
 
-Returns a handler for the `GET /images/{id}/json` endpoint that responds with the provided `imageInfo` as JSON at HTTP 200.
+Returns a handler for the `GET /images/{id}/json` endpoint that responds with the provided `imageInfo` as JSON at HTTP
+200.
 
 ---
 
 #### `ListContainersHandler(statuses ...string) http.HandlerFunc`
 
-Returns a handler for the `GET /containers/json` endpoint. Reads `mocks/data/containers.json`, filters the container list to only those whose `State` field matches one of the provided `statuses`, and responds with the filtered list. Verifies that the request's `filters` query parameter matches the expected filter arguments.
+Returns a handler for the `GET /containers/json` endpoint. Reads `mocks/data/containers.json`, filters the container
+list to only those whose `State` field matches one of the provided `statuses`, and responds with the filtered list.
+Verifies that the request's `filters` query parameter matches the expected filter arguments.
 
 ---
 
 #### `KillContainerHandler(containerID string, found FoundStatus) http.HandlerFunc`
 
-Returns a handler for the `POST /containers/{id}/kill` endpoint. Responds with HTTP 204 No Content if `found` is `Found`, or HTTP 404 if `found` is `Missing`.
+Returns a handler for the `POST /containers/{id}/kill` endpoint. Responds with HTTP 204 No Content if `found` is
+`Found`, or HTTP 404 if `found` is `Missing`.
 
 ---
 
 #### `RemoveContainerHandler(containerID string, found FoundStatus) http.HandlerFunc`
 
-Returns a handler for the `DELETE /containers/{id}` endpoint. Responds with HTTP 204 No Content if `found` is `Found`, or HTTP 404 if `found` is `Missing`.
+Returns a handler for the `DELETE /containers/{id}` endpoint. Responds with HTTP 204 No Content if `found` is `Found`,
+or HTTP 404 if `found` is `Missing`.
 
 ---
 
 #### `RemoveImageHandler(imagesWithParents map[string][]string) http.HandlerFunc`
 
-Returns a handler for the `DELETE /images/{id}` endpoint. Extracts the image ID from the request URL and looks it up in `imagesWithParents`. If found, responds with a JSON array of `ImageDeleteResponseItem` entries covering the image and its parents. If not found, responds with HTTP 404.
+Returns a handler for the `DELETE /images/{id}` endpoint. Extracts the image ID from the request URL and looks it up in
+`imagesWithParents`. If found, responds with a JSON array of `ImageDeleteResponseItem` entries covering the image and
+its parents. If not found, responds with HTTP 404.
 
 ---
 
@@ -103,13 +121,17 @@ A boolean type alias used to make handler construction calls self-documenting.
 
 ### `FilterableContainer.go`
 
-An auto-generated [testify/mock](https://pkg.go.dev/github.com/stretchr/testify/mock) implementation of the `types.FilterableContainer` interface. Used by tests in `pkg/filters` and `pkg/registry` to verify filter logic without constructing real container objects.
+An auto-generated [testify/mock](https://pkg.go.dev/github.com/stretchr/testify/mock) implementation of the
+`types.FilterableContainer` interface. Used by tests in `pkg/filters` and `pkg/registry` to verify filter logic without
+constructing real container objects.
 
 **Type:**
 
 #### `FilterableContainer`
 
-Embeds `mock.Mock` and implements all methods of `types.FilterableContainer`. Each method delegates to testify's `Called()` mechanism, allowing tests to set up expectations and return values with `On(...)` and assert them with `AssertExpectations(t)`.
+Embeds `mock.Mock` and implements all methods of `types.FilterableContainer`. Each method delegates to testify's
+`Called()` mechanism, allowing tests to set up expectations and return values with `On(...)` and assert them with
+`AssertExpectations(t)`.
 
 | Method | Return type | Description |
 |---|---|---|
@@ -123,7 +145,8 @@ Embeds `mock.Mock` and implements all methods of `types.FilterableContainer`. Ea
 
 ### `container_ref.go`
 
-Defines the `ContainerRef` and `imageRef` types used to describe mock containers declaratively. These types drive the handler generation in `ApiServer.go` and map container names to their fixture JSON files.
+Defines the `ContainerRef` and `imageRef` types used to describe mock containers declaratively. These types drive the
+handler generation in `ApiServer.go` and map container names to their fixture JSON files.
 
 **Types:**
 
@@ -155,13 +178,15 @@ Describes a mock container, including how to locate its fixture data and any con
 
 ##### `(cr *ContainerRef) ContainerID() types.ContainerID`
 
-Returns the container's ID. Used by tests to retrieve the ID of a named fixture for use in API handler setup and assertions.
+Returns the container's ID. Used by tests to retrieve the ID of a named fixture for use in API handler setup and
+assertions.
 
 ---
 
 ## `data/` Fixture Files
 
-The `data/` subdirectory contains JSON files that represent real Docker API responses, captured from a live Docker daemon. They are loaded by `RespondWithJSONFile` and `ListContainersHandler` at test runtime.
+The `data/` subdirectory contains JSON files that represent real Docker API responses, captured from a live Docker
+daemon. They are loaded by `RespondWithJSONFile` and `ListContainersHandler` at test runtime.
 
 **Container fixtures** (`GET /containers/{id}/json`):
 

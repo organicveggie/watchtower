@@ -1,6 +1,9 @@
 # `pkg/types` Package
 
-This package defines all shared interfaces, type aliases, and data structures used across Watchtower. It is the dependency-free foundation of the codebase — every other package may import it, but it imports nothing from within Watchtower itself. Its primary role is to establish the contracts (interfaces) that decouple the major subsystems from their concrete implementations, enabling testability and clear separation of concerns.
+This package defines all shared interfaces, type aliases, and data structures used across Watchtower. It is the
+dependency-free foundation of the codebase — every other package may import it, but it imports nothing from within
+Watchtower itself. Its primary role is to establish the contracts (interfaces) that decouple the major subsystems from
+their concrete implementations, enabling testability and clear separation of concerns.
 
 ---
 
@@ -8,7 +11,8 @@ This package defines all shared interfaces, type aliases, and data structures us
 
 ### `container.go`
 
-Defines the two ID type aliases and their shared `ShortID` method, and the `Container` interface that abstracts all per-container behaviour.
+Defines the two ID type aliases and their shared `ShortID` method, and the `Container` interface that abstracts all
+per-container behaviour.
 
 **Types:**
 
@@ -39,7 +43,8 @@ A named string type representing a Docker container instance ID.
 Shared implementation behind both `ShortID` methods. Parses any `<prefix>:` preamble in the ID string:
 
 - If the prefix is `"sha256"`, strips it and returns the first 12 characters of the hash portion.
-- If the prefix is anything else (e.g. an unknown digest algorithm), includes it in the output and returns the first `12 + len(prefix) + 1` characters.
+- If the prefix is anything else (e.g. an unknown digest algorithm), includes it in the output and returns the first `12
+  + len(prefix) + 1` characters.
 - If no prefix separator is found, returns the first 12 characters directly.
 - If the string is shorter than the required length, returns it unchanged.
 
@@ -47,7 +52,9 @@ Shared implementation behind both `ShortID` methods. Parses any `<prefix>:` prea
 
 #### `Container` _(interface)_
 
-The central abstraction for a Docker container. Implemented by `pkg/container.Container` and by mock types in `internal/actions/mocks` and `pkg/container/container_mock_test.go`. Consumed by virtually every package in the codebase.
+The central abstraction for a Docker container. Implemented by `pkg/container.Container` and by mock types in
+`internal/actions/mocks` and `pkg/container/container_mock_test.go`. Consumed by virtually every package in the
+codebase.
 
 | Method | Return type | Description |
 |---|---|---|
@@ -117,7 +124,10 @@ Defines the `Filter` function type.
 
 #### `Filter func(FilterableContainer) bool`
 
-A function type used throughout the container listing and filtering pipeline. A `Filter` accepts a `FilterableContainer` and returns `true` if the container should be included. Filters are composed via the constructor functions in `pkg/filters`. The zero value (`nil`) should not be passed to `Client.ListContainers`; `filters.NoFilter` is used as the always-true base case.
+A function type used throughout the container listing and filtering pipeline. A `Filter` accepts a `FilterableContainer`
+and returns `true` if the container should be included. Filters are composed via the constructor functions in
+`pkg/filters`. The zero value (`nil`) should not be passed to `Client.ListContainers`; `filters.NoFilter` is used as the
+always-true base case.
 
 ---
 
@@ -129,7 +139,9 @@ Defines the minimal interface used by the filter system.
 
 #### `FilterableContainer` _(interface)_
 
-A subset of the `Container` interface exposing only the fields needed to evaluate filter predicates. Implemented by `pkg/container.Container` and mocked by `pkg/container/mocks.FilterableContainer`. Keeping this interface narrow prevents filters from depending on the full `Container` interface and makes mocking easier.
+A subset of the `Container` interface exposing only the fields needed to evaluate filter predicates. Implemented by
+`pkg/container.Container` and mocked by `pkg/container/mocks.FilterableContainer`. Keeping this interface narrow
+prevents filters from depending on the full `Container` interface and makes mocking easier.
 
 | Method | Return type | Description |
 |---|---|---|
@@ -149,7 +161,8 @@ Defines the `Notifier` interface implemented by `pkg/notifications.shoutrrrTypeN
 
 #### `Notifier` _(interface)_
 
-The contract for any notification service. Consumed by `cmd/root.go` which holds a `Notifier` instance and calls `StartNotification` / `SendNotification` around each update cycle, and `Close` on shutdown.
+The contract for any notification service. Consumed by `cmd/root.go` which holds a `Notifier` instance and calls
+`StartNotification` / `SendNotification` around each update cycle, and `Close` on shutdown.
 
 | Method | Description |
 |---|---|
@@ -170,7 +183,9 @@ Defines the interfaces implemented by the legacy per-service notification adapte
 
 #### `ConvertibleNotifier` _(interface)_
 
-Implemented by the four legacy notifier types (`emailTypeNotifier`, `slackTypeNotifier`, `msTeamsTypeNotifier`, `gotifyTypeNotifier`). Used by `AppendLegacyUrls` in `pkg/notifications/notifier.go` to convert old-style flag-based configs into Shoutrrr URLs.
+Implemented by the four legacy notifier types (`emailTypeNotifier`, `slackTypeNotifier`, `msTeamsTypeNotifier`,
+`gotifyTypeNotifier`). Used by `AppendLegacyUrls` in `pkg/notifications/notifier.go` to convert old-style flag-based
+configs into Shoutrrr URLs.
 
 | Method | Return type | Description |
 |---|---|---|
@@ -180,7 +195,8 @@ Implemented by the four legacy notifier types (`emailTypeNotifier`, `slackTypeNo
 
 #### `DelayNotifier` _(interface)_
 
-An optional extension of `ConvertibleNotifier`. Currently implemented only by `emailTypeNotifier`. Checked via a type assertion in `AppendLegacyUrls` to determine whether to apply a per-notifier send delay.
+An optional extension of `ConvertibleNotifier`. Currently implemented only by `emailTypeNotifier`. Checked via a type
+assertion in `AppendLegacyUrls` to determine whether to apply a per-notifier send delay.
 
 | Method | Return type | Description |
 |---|---|---|
@@ -212,7 +228,8 @@ Implemented by `pkg/session.report`. Represents the immutable result of a comple
 
 #### `ContainerReport` _(interface)_
 
-Implemented by `pkg/session.ContainerStatus` and `pkg/notifications/preview/data.containerStatus`. Represents the per-container result within a session report.
+Implemented by `pkg/session.ContainerStatus` and `pkg/notifications/preview/data.containerStatus`. Represents the
+per-container result within a session report.
 
 | Method | Return type | Description |
 |---|---|---|
@@ -234,7 +251,8 @@ Defines the credential pair type used when constructing registry auth tokens.
 
 #### `RegistryCredentials`
 
-A simple struct holding a username and password for basic registry authentication. Used by `pkg/registry/digest.TransformAuth` when unmarshalling a base64-encoded Docker config auth JSON blob.
+A simple struct holding a username and password for basic registry authentication. Used by
+`pkg/registry/digest.TransformAuth` when unmarshalling a base64-encoded Docker config auth JSON blob.
 
 | Field | Type | Description |
 |---|---|---|
@@ -261,4 +279,7 @@ Unmarshalled from the JSON body of a successful bearer token exchange in `pkg/re
 
 ## Test Coverage
 
-This package has no test files. The types defined here are exercised through the tests of the packages that implement or consume them — most extensively in `pkg/container/container_test.go` (which tests `ShortID` via `util_test.go`), `internal/actions/update_test.go` (which exercises `Container`, `UpdateParams`, `Filter`, and `Report`), and `pkg/notifications/shoutrrr_test.go` (which exercises `Notifier` and `Report`).
+This package has no test files. The types defined here are exercised through the tests of the packages that implement or
+consume them — most extensively in `pkg/container/container_test.go` (which tests `ShortID` via `util_test.go`),
+`internal/actions/update_test.go` (which exercises `Container`, `UpdateParams`, `Filter`, and `Report`), and
+`pkg/notifications/shoutrrr_test.go` (which exercises `Notifier` and `Report`).

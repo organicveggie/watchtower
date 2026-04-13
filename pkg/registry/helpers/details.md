@@ -1,6 +1,9 @@
 # `pkg/registry/helpers` Package
 
-This package provides a single utility function for extracting the registry host address from a Docker image reference. It is the shared, low-level building block used across the registry packages — consumed by `pkg/registry/auth`, `pkg/registry/digest`, `pkg/registry/manifest`, and `pkg/registry/trust` wherever a registry hostname needs to be resolved from an image name.
+This package provides a single utility function for extracting the registry host address from a Docker image reference.
+It is the shared, low-level building block used across the registry packages — consumed by `pkg/registry/auth`,
+`pkg/registry/digest`, `pkg/registry/manifest`, and `pkg/registry/trust` wherever a registry hostname needs to be
+resolved from an image name.
 
 ---
 
@@ -26,9 +29,13 @@ Declares three domain constants and one public function.
 
 #### `GetRegistryAddress(imageRef string) (string, error)`
 
-Parses an image reference string and returns the hostname of the registry that hosts it. Uses `reference.ParseNormalizedNamed` to normalise the reference (adding default registry and tag components where absent) and then calls `reference.Domain` to extract the host portion.
+Parses an image reference string and returns the hostname of the registry that hosts it. Uses
+`reference.ParseNormalizedNamed` to normalise the reference (adding default registry and tag components where absent)
+and then calls `reference.Domain` to extract the host portion.
 
-Applies one post-processing step: if the extracted domain is `DefaultRegistryDomain` (`"docker.io"`), it is replaced with `DefaultRegistryHost` (`"index.docker.io"`), ensuring callers always receive the real API host rather than the vanity domain.
+Applies one post-processing step: if the extracted domain is `DefaultRegistryDomain` (`"docker.io"`), it is replaced
+with `DefaultRegistryHost` (`"index.docker.io"`), ensuring callers always receive the real API host rather than the
+vanity domain.
 
 Returns an error if `imageRef` is empty or cannot be parsed as a valid image reference.
 

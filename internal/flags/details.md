@@ -1,6 +1,9 @@
 # `internal/flags` Package
 
-This package centralises all command-line flag and environment variable handling for Watchtower. It is responsible for declaring every flag the application accepts, binding those flags to their corresponding environment variables via [Viper](https://github.com/spf13/viper), resolving secrets stored in files, processing flag aliases, and configuring the global logger. It is consumed almost exclusively by `cmd/root.go` and `cmd/notify-upgrade.go`.
+This package centralises all command-line flag and environment variable handling for Watchtower. It is responsible for
+declaring every flag the application accepts, binding those flags to their corresponding environment variables via
+[Viper](https://github.com/spf13/viper), resolving secrets stored in files, processing flag aliases, and configuring the
+global logger. It is consumed almost exclusively by `cmd/root.go` and `cmd/notify-upgrade.go`.
 
 ---
 
@@ -8,7 +11,8 @@ This package centralises all command-line flag and environment variable handling
 
 ### `flags.go`
 
-Declares and registers all flags, provides helpers for reading their values, and implements several cross-cutting concerns such as secret file resolution, alias expansion, and logging setup.
+Declares and registers all flags, provides helpers for reading their values, and implements several cross-cutting
+concerns such as secret file resolution, alias expansion, and logging setup.
 
 **Constants:**
 
@@ -36,7 +40,8 @@ Registers the three flags that are passed directly to the Docker API client:
 
 #### `RegisterSystemFlags(rootCmd *cobra.Command)`
 
-Registers all flags that control Watchtower's runtime behaviour. These cover scheduling, container selection, update strategy, and HTTP API configuration. The full set of flags registered is:
+Registers all flags that control Watchtower's runtime behaviour. These cover scheduling, container selection, update
+strategy, and HTTP API configuration. The full set of flags registered is:
 
 | Flag | Env Var | Description |
 |---|---|---|
@@ -75,7 +80,8 @@ Registers all flags that control Watchtower's runtime behaviour. These cover sch
 
 #### `RegisterNotificationFlags(rootCmd *cobra.Command)`
 
-Registers all flags related to sending notifications. Covers the modern Shoutrrr URL-based approach as well as the legacy per-service flags (email, Slack, MSTeams, Gotify) that are retained for backwards compatibility.
+Registers all flags related to sending notifications. Covers the modern Shoutrrr URL-based approach as well as the
+legacy per-service flags (email, Slack, MSTeams, Gotify) that are retained for backwards compatibility.
 
 | Flag | Env Var | Description |
 |---|---|---|
@@ -114,7 +120,8 @@ Registers all flags related to sending notifications. Covers the modern Shoutrrr
 
 #### `SetDefaults()`
 
-Initialises Viper with `AutomaticEnv()` and sets default values for all environment variables that have one. Must be called before any flag registration. Key defaults include:
+Initialises Viper with `AutomaticEnv()` and sets default values for all environment variables that have one. Must be
+called before any flag registration. Key defaults include:
 
 | Variable | Default |
 |---|---|
@@ -134,7 +141,9 @@ Initialises Viper with `AutomaticEnv()` and sets default values for all environm
 
 #### `EnvConfig(cmd *cobra.Command) error`
 
-Reads the Docker connection flags (`--host`, `--tlsverify`, `--api-version`) from the parsed command and writes them to the corresponding `DOCKER_*` environment variables. This is necessary because the Docker SDK client reads its configuration from the environment rather than accepting values directly.
+Reads the Docker connection flags (`--host`, `--tlsverify`, `--api-version`) from the parsed command and writes them to
+the corresponding `DOCKER_*` environment variables. This is necessary because the Docker SDK client reads its
+configuration from the environment rather than accepting values directly.
 
 Returns an error if any flag cannot be read or if `os.Setenv` fails.
 
@@ -142,15 +151,20 @@ Returns an error if any flag cannot be read or if `os.Setenv` fails.
 
 #### `ReadFlags(cmd *cobra.Command) (cleanup bool, noRestart bool, monitorOnly bool, timeout time.Duration)`
 
-Reads the four most commonly used runtime flags from the persistent flag set and returns them as typed Go values. Calls `log.Fatal` if any flag is missing, as these flags are always expected to be registered before `ReadFlags` is called.
+Reads the four most commonly used runtime flags from the persistent flag set and returns them as typed Go values. Calls
+`log.Fatal` if any flag is missing, as these flags are always expected to be registered before `ReadFlags` is called.
 
 ---
 
 #### `GetSecretsFromFiles(rootCmd *cobra.Command)`
 
-Iterates over a fixed list of sensitive flags and, for each one, checks whether the flag's current value is a path to an existing file rather than a literal secret. If it is, the flag's value is replaced with the contents of that file (whitespace trimmed). For slice-valued flags (e.g. `--notification-url`), each entry in the slice is checked and expanded independently, and blank lines in the file are discarded.
+Iterates over a fixed list of sensitive flags and, for each one, checks whether the flag's current value is a path to an
+existing file rather than a literal secret. If it is, the flag's value is replaced with the contents of that file
+(whitespace trimmed). For slice-valued flags (e.g. `--notification-url`), each entry in the slice is checked and
+expanded independently, and blank lines in the file are discarded.
 
-The flags checked are: `notification-email-server-password`, `notification-slack-hook-url`, `notification-msteams-hook`, `notification-gotify-token`, `notification-url`, and `http-api-token`.
+The flags checked are: `notification-email-server-password`, `notification-slack-hook-url`, `notification-msteams-hook`,
+`notification-gotify-token`, `notification-url`, and `http-api-token`.
 
 Calls `log.Fatalf` if a referenced file cannot be read.
 
@@ -158,10 +172,14 @@ Calls `log.Fatalf` if a referenced file cannot be read.
 
 #### `ProcessFlagAliases(flags *pflag.FlagSet)`
 
-Expands higher-level convenience flags into their underlying equivalents. Should be called after flag parsing and before the main run logic. Performs the following transformations:
+Expands higher-level convenience flags into their underlying equivalents. Should be called after flag parsing and before
+the main run logic. Performs the following transformations:
 
-- **`--porcelain v1`** — Appends `logger://` to `--notification-url`, sets `--notification-log-stdout`, `--notification-report`, and `--notification-template` to the appropriate porcelain template, if those flags have not already been set explicitly.
-- **`--interval` / `--schedule`** — Enforces mutual exclusion (calls `log.Fatal` if both are set), then converts `--interval N` into the equivalent cron expression `@every Ns` and writes it to `--schedule`.
+- **`--porcelain v1`** — Appends `logger://` to `--notification-url`, sets `--notification-log-stdout`,
+  `--notification-report`, and `--notification-template` to the appropriate porcelain template, if those flags have not
+  already been set explicitly.
+- **`--interval` / `--schedule`** — Enforces mutual exclusion (calls `log.Fatal` if both are set), then converts
+  `--interval N` into the equivalent cron expression `@every Ns` and writes it to `--schedule`.
 - **`--debug`** — Sets `--log-level` to `debug`.
 - **`--trace`** — Sets `--log-level` to `trace`.
 
@@ -169,7 +187,8 @@ Expands higher-level convenience flags into their underlying equivalents. Should
 
 #### `SetupLogging(f *pflag.FlagSet) error`
 
-Reads `--log-format` and `--log-level` from the flag set and applies them to the global Logrus logger. Supported formats and their effects:
+Reads `--log-format` and `--log-level` from the flag set and applies them to the global Logrus logger. Supported formats
+and their effects:
 
 | Format | Behaviour |
 |---|---|

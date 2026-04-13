@@ -1,6 +1,9 @@
 # `pkg/notifications/templates` Package
 
-This package exposes the shared Go template function map used across Watchtower's notification template system. It is the single source of truth for the custom functions available to users writing `--notification-template` values. It is consumed by `pkg/notifications` (when parsing user-supplied and built-in templates) and by `pkg/notifications/preview` (when rendering template previews).
+This package exposes the shared Go template function map used across Watchtower's notification template system. It is
+the single source of truth for the custom functions available to users writing `--notification-template` values. It is
+consumed by `pkg/notifications` (when parsing user-supplied and built-in templates) and by `pkg/notifications/preview`
+(when rendering template previews).
 
 ---
 
@@ -16,7 +19,8 @@ Declares the exported `Funcs` map and its one private helper.
 
 #### `Funcs template.FuncMap`
 
-The shared `text/template` function map registered on every template parsed by Watchtower. Exposes the following functions to template authors:
+The shared `text/template` function map registered on every template parsed by Watchtower. Exposes the following
+functions to template authors:
 
 | Function | Signature | Description |
 |---|---|---|
@@ -37,4 +41,6 @@ The shared `text/template` function map registered on every template parsed by W
 
 ## Test Coverage
 
-This package has no dedicated test file. The four functions in `Funcs` are exercised by the template tests in `pkg/notifications/shoutrrr_test.go`, which verify `ToUpper`, `ToLower`, and `Title` against known inputs, and by the `json.v1` built-in template in `pkg/notifications/common_templates.go` which uses `ToJSON`.
+This package has no dedicated test file. The four functions in `Funcs` are exercised by the template tests in
+`pkg/notifications/shoutrrr_test.go`, which verify `ToUpper`, `ToLower`, and `Title` against known inputs, and by the
+`json.v1` built-in template in `pkg/notifications/common_templates.go` which uses `ToJSON`.

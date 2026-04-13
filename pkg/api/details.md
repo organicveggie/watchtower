@@ -1,6 +1,9 @@
 # `pkg/api` Package
 
-This package provides the HTTP API server for Watchtower. It is responsible for managing handler registration, enforcing bearer token authentication on all endpoints, and starting the HTTP server. It does not implement any specific endpoint itself — those live in the subpackages `pkg/api/update` and `pkg/api/metrics`. It is instantiated and started by `cmd/root.go` when either `--http-api-update` or `--http-api-metrics` is set.
+This package provides the HTTP API server for Watchtower. It is responsible for managing handler registration, enforcing
+bearer token authentication on all endpoints, and starting the HTTP server. It does not implement any specific endpoint
+itself — those live in the subpackages `pkg/api/update` and `pkg/api/metrics`. It is instantiated and started by
+`cmd/root.go` when either `--http-api-update` or `--http-api-metrics` is set.
 
 ---
 
@@ -37,7 +40,8 @@ The central API server instance. Fields:
 
 #### `New(token string) *API`
 
-Factory function that creates and returns a new `API` instance with the provided bearer token and `hasHandlers` initialised to `false`.
+Factory function that creates and returns a new `API` instance with the provided bearer token and `hasHandlers`
+initialised to `false`.
 
 ---
 
@@ -56,13 +60,16 @@ This is applied automatically to every handler registered via `RegisterFunc` or 
 
 #### `(api *API) RegisterFunc(path string, fn http.HandlerFunc)`
 
-Registers an `http.HandlerFunc` on the default serve mux at the given path, wrapped with `RequireToken`. Also sets `hasHandlers` to `true` so that `Start` knows to launch the server.
+Registers an `http.HandlerFunc` on the default serve mux at the given path, wrapped with `RequireToken`. Also sets
+`hasHandlers` to `true` so that `Start` knows to launch the server.
 
 ---
 
 #### `(api *API) RegisterHandler(path string, handler http.Handler)`
 
-Registers an `http.Handler` on the default serve mux at the given path, wrapping its `ServeHTTP` method with `RequireToken`. Also sets `hasHandlers` to `true`. Used by `pkg/api/metrics` to register the Prometheus handler, which implements `http.Handler` rather than `http.HandlerFunc`.
+Registers an `http.Handler` on the default serve mux at the given path, wrapping its `ServeHTTP` method with
+`RequireToken`. Also sets `hasHandlers` to `true`. Used by `pkg/api/metrics` to register the Prometheus handler, which
+implements `http.Handler` rather than `http.HandlerFunc`.
 
 ---
 
@@ -70,12 +77,14 @@ Registers an `http.Handler` on the default serve mux at the given path, wrapping
 
 Starts the HTTP server listening on `:8080`. Behaviour:
 
-- If no handlers have been registered (`hasHandlers` is `false`), logs a debug message and returns `nil` without starting the server.
+- If no handlers have been registered (`hasHandlers` is `false`), logs a debug message and returns `nil` without
+  starting the server.
 - If `Token` is empty, calls `log.Fatal` with `tokenMissingMsg` to prevent the server starting without authentication.
 - If `block` is `true`, runs the server in the current goroutine (blocking until the process exits).
 - If `block` is `false`, runs the server in a new goroutine, allowing the caller to continue.
 
-Returns `nil` in all non-fatal cases. The underlying `http.ListenAndServe` call is wrapped in `log.Fatal`, so any server error will terminate the process.
+Returns `nil` in all non-fatal cases. The underlying `http.ListenAndServe` call is wrapped in `log.Fatal`, so any server
+error will terminate the process.
 
 ---
 

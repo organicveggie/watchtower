@@ -1,6 +1,10 @@
 # `pkg/metrics` Package
 
-This package owns all Prometheus metric definitions and their registration for Watchtower. It defines the gauges and counters exposed at the `/v1/metrics` endpoint, provides a singleton accessor for the shared metrics instance, and exposes a `RegisterScan` function that records the result of each update session. It is consumed by `pkg/api/metrics` (for HTTP exposition) and by `cmd/root.go` (via `runUpdatesWithNotifications`, which calls `RegisterScan` after every cycle).
+This package owns all Prometheus metric definitions and their registration for Watchtower. It defines the gauges and
+counters exposed at the `/v1/metrics` endpoint, provides a singleton accessor for the shared metrics instance, and
+exposes a `RegisterScan` function that records the result of each update session. It is consumed by `pkg/api/metrics`
+(for HTTP exposition) and by `cmd/root.go` (via `runUpdatesWithNotifications`, which calls `RegisterScan` after every
+cycle).
 
 ---
 
@@ -55,19 +59,23 @@ Holds the Prometheus metrics and the channel used to process scan results asynch
 
 #### `NewMetric(report types.Report) *Metric`
 
-Constructs a `Metric` from a `types.Report`. `Updated` is set to `len(report.Updated()) + len(report.Stale())` — stale containers are folded in for backwards compatibility.
+Constructs a `Metric` from a `types.Report`. `Updated` is set to `len(report.Updated()) + len(report.Stale())` — stale
+containers are folded in for backwards compatibility.
 
 ---
 
 #### `Default() *Metrics`
 
-Returns the singleton `Metrics` instance, creating it if it has not yet been initialised. On first call, constructs all five Prometheus metrics using `promauto` (which registers them automatically with the default registry) and starts a background goroutine running `HandleUpdate`. Subsequent calls return the already-initialised instance.
+Returns the singleton `Metrics` instance, creating it if it has not yet been initialised. On first call, constructs all
+five Prometheus metrics using `promauto` (which registers them automatically with the default registry) and starts a
+background goroutine running `HandleUpdate`. Subsequent calls return the already-initialised instance.
 
 ---
 
 #### `RegisterScan(metric *Metric)`
 
-Package-level convenience function. Calls `Default()` to obtain the singleton and then calls `Register` to enqueue the metric.
+Package-level convenience function. Calls `Default()` to obtain the singleton and then calls `Register` to enqueue the
+metric.
 
 ---
 
@@ -77,13 +85,15 @@ Package-level convenience function. Calls `Default()` to obtain the singleton an
 
 #### `(metrics *Metrics) Register(metric *Metric)`
 
-Sends `metric` to the internal channel. Blocks if the channel buffer (capacity 10) is full. The actual Prometheus updates happen asynchronously in the `HandleUpdate` goroutine.
+Sends `metric` to the internal channel. Blocks if the channel buffer (capacity 10) is full. The actual Prometheus
+updates happen asynchronously in the `HandleUpdate` goroutine.
 
 ---
 
 #### `(metrics *Metrics) QueueIsEmpty() bool`
 
-Returns `true` when no metrics are waiting in the channel. Used in tests to wait for the background goroutine to finish processing.
+Returns `true` when no metrics are waiting in the channel. Used in tests to wait for the background goroutine to finish
+processing.
 
 ---
 
@@ -91,10 +101,13 @@ Returns `true` when no metrics are waiting in the channel. Used in tests to wait
 
 Runs as a goroutine started by `Default()`. Processes each `*Metric` received from the channel:
 
-- **`nil` metric** (skipped scan): Increments `watchtower_scans_total` and `watchtower_scans_skipped` by 1. Resets the three gauges (`scanned`, `updated`, `failed`) to 0.
-- **Non-nil metric**: Increments `watchtower_scans_total` by 1. Sets `watchtower_containers_scanned`, `watchtower_containers_updated`, and `watchtower_containers_failed` to the values from the metric.
+- **`nil` metric** (skipped scan): Increments `watchtower_scans_total` and `watchtower_scans_skipped` by 1. Resets the
+  three gauges (`scanned`, `updated`, `failed`) to 0.
+- **Non-nil metric**: Increments `watchtower_scans_total` by 1. Sets `watchtower_containers_scanned`,
+  `watchtower_containers_updated`, and `watchtower_containers_failed` to the values from the metric.
 
-Because the per-scan fields are Gauges rather than Counters, they always reflect the **most recent** scan, not a running total.
+Because the per-scan fields are Gauges rather than Counters, they always reflect the **most recent** scan, not a running
+total.
 
 ---
 

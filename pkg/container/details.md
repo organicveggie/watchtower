@@ -1,6 +1,9 @@
 # `pkg/container` Package
 
-This package is the primary abstraction layer between Watchtower and the Docker daemon. It defines the `Client` interface and its production implementation, the `Container` type and all of its behaviour, label-driven metadata accessors, cgroup-based self-identification, and the sentinel errors used across the package. It is consumed by `internal/actions`, `cmd/root.go`, and the registry packages.
+This package is the primary abstraction layer between Watchtower and the Docker daemon. It defines the `Client`
+interface and its production implementation, the `Container` type and all of its behaviour, label-driven metadata
+accessors, cgroup-based self-identification, and the sentinel errors used across the package. It is consumed by
+`internal/actions`, `cmd/root.go`, and the registry packages.
 
 ---
 
@@ -8,13 +11,16 @@ This package is the primary abstraction layer between Watchtower and the Docker 
 
 ### `client.go`
 
-Implements the `Client` interface using the official Docker SDK. Handles all communication with the Docker daemon: listing and inspecting containers, pulling images, starting and stopping containers, executing commands, and removing images.
+Implements the `Client` interface using the official Docker SDK. Handles all communication with the Docker daemon:
+listing and inspecting containers, pulling images, starting and stopping containers, executing commands, and removing
+images.
 
 **Types:**
 
 #### `Client` _(interface)_
 
-The interface through which all of Watchtower's Docker interactions are performed. Implemented by `dockerClient` and by the mock client in `internal/actions/mocks`.
+The interface through which all of Watchtower's Docker interactions are performed. Implemented by `dockerClient` and by
+the mock client in `internal/actions/mocks`.
 
 | Method | Description |
 |---|---|
@@ -70,7 +76,9 @@ A string type that controls warning behaviour for failed registry HEAD requests.
 
 #### `NewClient(opts ClientOptions) Client`
 
-Factory function that creates and returns a production `dockerClient` by reading connection parameters from the standard Docker environment variables (`DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_API_VERSION`). Calls `log.Fatalf` if the SDK client cannot be initialised.
+Factory function that creates and returns a production `dockerClient` by reading connection parameters from the standard
+Docker environment variables (`DOCKER_HOST`, `DOCKER_TLS_VERIFY`, `DOCKER_API_VERSION`). Calls `log.Fatalf` if the SDK
+client cannot be initialised.
 
 ---
 
@@ -80,37 +88,51 @@ Factory function that creates and returns a production `dockerClient` by reading
 
 ##### `WarnOnHeadPullFailed(container types.Container) bool`
 
-Delegates to `registry.WarnOnAPIConsumption` when the strategy is `WarnAuto`, and returns a fixed `true` or `false` for `WarnAlways` and `WarnNever` respectively.
+Delegates to `registry.WarnOnAPIConsumption` when the strategy is `WarnAuto`, and returns a fixed `true` or `false` for
+`WarnAlways` and `WarnNever` respectively.
 
 ---
 
 ##### `ListContainers(fn types.Filter) ([]types.Container, error)`
 
-Queries the Docker daemon for containers matching the configured status filters (running, and optionally stopped and/or restarting). For each returned container, calls `GetContainer` to fetch full details, then applies the user-supplied filter function `fn`. Returns only the containers for which `fn` returns `true`.
+Queries the Docker daemon for containers matching the configured status filters (running, and optionally stopped and/or
+restarting). For each returned container, calls `GetContainer` to fetch full details, then applies the user-supplied
+filter function `fn`. Returns only the containers for which `fn` returns `true`.
 
 ---
 
 ##### `GetContainer(containerID types.ContainerID) (types.Container, error)`
 
-Inspects a single container by ID. If the container uses `network_mode: container:<id>`, resolves the referenced container's name so that the network mode reference remains valid after the supplier is recreated. If the supplier lookup fails, logs a warning and leaves the original network mode unchanged — no error is returned. Fetches the container's image info via `ImageInspectWithRaw` and returns a fully populated `Container`. If image info cannot be fetched, returns a `Container` with a nil `imageInfo` rather than an error.
+Inspects a single container by ID. If the container uses `network_mode: container:<id>`, resolves the referenced
+container's name so that the network mode reference remains valid after the supplier is recreated. If the supplier
+lookup fails, logs a warning and leaves the original network mode unchanged — no error is returned. Fetches the
+container's image info via `ImageInspectWithRaw` and returns a fully populated `Container`. If image info cannot be
+fetched, returns a `Container` with a nil `imageInfo` rather than an error.
 
 ---
 
 ##### `StopContainer(c types.Container, timeout time.Duration) error`
 
-Stops a container by sending its configured stop signal (defaulting to `SIGTERM`) via `ContainerKill`, but only if the container is currently running. Waits for it to exit, then removes it. Respects the `AutoRemove` host config flag — if set, skips the explicit `ContainerRemove` call. After removal, waits again to confirm the container is gone, returning an error if it persists.
+Stops a container by sending its configured stop signal (defaulting to `SIGTERM`) via `ContainerKill`, but only if the
+container is currently running. Waits for it to exit, then removes it. Respects the `AutoRemove` host config flag — if
+set, skips the explicit `ContainerRemove` call. After removal, waits again to confirm the container is gone, returning
+an error if it persists.
 
 ---
 
 ##### `GetNetworkConfig(c types.Container) *network.NetworkingConfig`
 
-Returns the container's current network endpoint configuration, with the container's own short ID removed from the aliases list of each network endpoint. This prevents stale container ID aliases from accumulating across updates.
+Returns the container's current network endpoint configuration, with the container's own short ID removed from the
+aliases list of each network endpoint. This prevents stale container ID aliases from accumulating across updates.
 
 ---
 
 ##### `StartContainer(c types.Container) (types.ContainerID, error)`
 
-Recreates a container from its current configuration. To work around a Docker API limitation with multiple networks, it creates the container connected to only one network, then disconnects and reconnects to all networks in the full config. Respects `ReviveStopped` — if the original container was not running and `ReviveStopped` is false, returns after creation without starting.
+Recreates a container from its current configuration. To work around a Docker API limitation with multiple networks, it
+creates the container connected to only one network, then disconnects and reconnects to all networks in the full config.
+Respects `ReviveStopped` — if the original container was not running and `ReviveStopped` is false, returns after
+creation without starting.
 
 ---
 
@@ -122,19 +144,23 @@ Renames the given container to `newName` via the Docker API.
 
 ##### `IsContainerStale(container types.Container, params types.UpdateParams) (bool, types.ImageID, error)`
 
-Determines whether a container's image is out of date. Unless `container.IsNoPull(params)` is true, pulls the latest image first via `PullImage`. Then calls `HasNewImage` to compare the current and latest image IDs.
+Determines whether a container's image is out of date. Unless `container.IsNoPull(params)` is true, pulls the latest
+image first via `PullImage`. Then calls `HasNewImage` to compare the current and latest image IDs.
 
 ---
 
 ##### `RemoveImageByID(id types.ImageID) error`
 
-Removes a Docker image by ID with `Force: true`. At debug log level, reports which image layers were deleted and untagged.
+Removes a Docker image by ID with `Force: true`. At debug log level, reports which image layers were deleted and
+untagged.
 
 ---
 
 ##### `ExecuteCommand(containerID types.ContainerID, command string, timeout int) (SkipUpdate bool, err error)`
 
-Runs a shell command (`sh -c <command>`) inside a container via the Docker exec API. Attaches to the exec session to capture output, then inspects the exit code. An exit code of `75` (`EX_TEMPFAIL`) signals that the update should be skipped without being treated as a failure. Any other non-zero exit code returns an error.
+Runs a shell command (`sh -c <command>`) inside a container via the Docker exec API. Attaches to the exec session to
+capture output, then inspects the exit code. An exit code of `75` (`EX_TEMPFAIL`) signals that the update should be
+skipped without being treated as a failure. Any other non-zero exit code returns an error.
 
 ---
 
@@ -153,13 +179,15 @@ Runs a shell command (`sh -c <command>`) inside a container via the Docker exec 
 
 ### `container.go`
 
-Defines the `Container` struct and implements the `types.Container` interface. Provides all introspection and configuration-building behaviour for individual containers.
+Defines the `Container` struct and implements the `types.Container` interface. Provides all introspection and
+configuration-building behaviour for individual containers.
 
 **Types:**
 
 #### `Container`
 
-The core container type. Wraps the Docker SDK's `ContainerJSON` and `ImageInspect` structs and exposes a higher-level interface over them.
+The core container type. Wraps the Docker SDK's `ContainerJSON` and `ImageInspect` structs and exposes a higher-level
+interface over them.
 
 | Field | Type | Description |
 |---|---|---|
@@ -226,7 +254,8 @@ Factory function. Returns a new `Container` wrapping the supplied Docker SDK str
 
 ### `metadata.go`
 
-Declares all Docker label key constants used by Watchtower and provides low-level label accessor helpers. Also contains `ContainsWatchtowerLabel`, the function used to identify Watchtower containers.
+Declares all Docker label key constants used by Watchtower and provides low-level label accessor helpers. Also contains
+`ContainsWatchtowerLabel`, the function used to identify Watchtower containers.
 
 **Constants:**
 
@@ -253,7 +282,8 @@ Declares all Docker label key constants used by Watchtower and provides low-leve
 
 #### `ContainsWatchtowerLabel(labels map[string]string) bool`
 
-Returns `true` if the supplied label map contains the key `com.centurylinklabs.watchtower` with the value `"true"`. Used by `IsWatchtower()` and by `filters.WatchtowerContainersFilter`.
+Returns `true` if the supplied label map contains the key `com.centurylinklabs.watchtower` with the value `"true"`. Used
+by `IsWatchtower()` and by `filters.WatchtowerContainersFilter`.
 
 ---
 
@@ -269,7 +299,8 @@ Returns `true` if the supplied label map contains the key `com.centurylinklabs.w
 
 ### `cgroup_id.go`
 
-Provides self-identification for the running Watchtower container. Used by `cmd/notify-upgrade.go` to determine the container ID so it can print the correct `docker cp` command for the user.
+Provides self-identification for the running Watchtower container. Used by `cmd/notify-upgrade.go` to determine the
+container ID so it can print the correct `docker cp` command for the user.
 
 **Public Functions:**
 
@@ -277,7 +308,9 @@ Provides self-identification for the running Watchtower container. Used by `cmd/
 
 #### `GetRunningContainerID() (cid types.ContainerID, err error)`
 
-Reads `/proc/<pid>/cgroup` for the current process and attempts to extract a Docker container ID from the contents. Returns an empty `ContainerID` if no match is found (e.g. when running outside a container), or an error if the file cannot be read.
+Reads `/proc/<pid>/cgroup` for the current process and attempts to extract a Docker container ID from the contents.
+Returns an empty `ContainerID` if no match is found (e.g. when running outside a container), or an error if the file
+cannot be read.
 
 ---
 

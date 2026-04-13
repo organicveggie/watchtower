@@ -1,6 +1,9 @@
 # `pkg/sorter` Package
 
-This package provides two sorting mechanisms for slices of `types.Container`: a creation-date sort used when cleaning up duplicate Watchtower instances, and a topological dependency sort used to determine the correct stop and start order during an update cycle. It is consumed by `internal/actions/check.go` (`ByCreated`) and `internal/actions/update.go` (`SortByDependencies`).
+This package provides two sorting mechanisms for slices of `types.Container`: a creation-date sort used when cleaning up
+duplicate Watchtower instances, and a topological dependency sort used to determine the correct stop and start order
+during an update cycle. It is consumed by `internal/actions/check.go` (`ByCreated`) and `internal/actions/update.go`
+(`SortByDependencies`).
 
 ---
 
@@ -16,7 +19,9 @@ Contains both sorting implementations in a single file.
 
 #### `ByCreated []types.Container`
 
-A `[]types.Container` type alias that implements `sort.Interface` by comparing containers' `Created` timestamps. Used with `sort.Sort` to order containers oldest-first. Consumed by `internal/actions/check.go` in `cleanupExcessWatchtowers` to identify the most recently created Watchtower instance (which is the one kept running).
+A `[]types.Container` type alias that implements `sort.Interface` by comparing containers' `Created` timestamps. Used
+with `sort.Sort` to order containers oldest-first. Consumed by `internal/actions/check.go` in `cleanupExcessWatchtowers`
+to identify the most recently created Watchtower instance (which is the one kept running).
 
 | Method | Description |
 |---|---|
@@ -32,7 +37,10 @@ A `[]types.Container` type alias that implements `sort.Interface` by comparing c
 
 #### `SortByDependencies(containers []types.Container) ([]types.Container, error)`
 
-Performs a topological sort of the container slice based on each container's declared dependencies (as returned by `container.Links()`). Returns a new slice in which every container appears after all containers it depends on. This ordering ensures that during an update cycle, linked containers are stopped in reverse order and started in forward order without violating dependency constraints.
+Performs a topological sort of the container slice based on each container's declared dependencies (as returned by
+`container.Links()`). Returns a new slice in which every container appears after all containers it depends on. This
+ordering ensures that during an update cycle, linked containers are stopped in reverse order and started in forward
+order without violating dependency constraints.
 
 Delegates to the unexported `dependencySorter` type. Returns an error if a circular dependency is detected.
 
@@ -61,4 +69,7 @@ Implements the topological sort using an iterative depth-first search with cycle
 
 ## Test Coverage
 
-This package has no dedicated test file. Its behaviour is exercised indirectly through `internal/actions/update_test.go`, which tests `SortByDependencies` via the `Update` function across scenarios including linked containers, rolling restarts, and dependency chains. `ByCreated` is exercised indirectly through `internal/actions/actions_suite_test.go`, which tests `CheckForMultipleWatchtowerInstances`.
+This package has no dedicated test file. Its behaviour is exercised indirectly through
+`internal/actions/update_test.go`, which tests `SortByDependencies` via the `Update` function across scenarios including
+linked containers, rolling restarts, and dependency chains. `ByCreated` is exercised indirectly through
+`internal/actions/actions_suite_test.go`, which tests `CheckForMultipleWatchtowerInstances`.

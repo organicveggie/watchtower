@@ -18,6 +18,7 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
+				"anthropic.claude-code",
 				"esbenp.prettier-vscode",
 				"ms-azuretools.vscode-docker",
 				"DavidAnson.vscode-markdownlint"

@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
       - uses: dominikh/staticcheck-action
   test:
     name: Test
@@ -34,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
       - name: Run tests
         run: |
           go test -v -coverprofile coverage.out -covermode atomic ./... 
@@ -51,7 +51,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v6
       - name: Build
         uses: goreleaser/goreleaser-action
         with:
